@@ -2201,6 +2201,10 @@
   function mhrCloseAdminPanel() {
     var overlay = document.getElementById('mhr-admin-overlay');
     if (overlay) overlay.style.display = 'none';
+    if (!document.querySelector('.content-section.active')) {
+      var firstTab = document.querySelector('.sidebar-tab');
+      if (firstTab) firstTab.click();
+    }
   }
   // Close on Escape — only when overlay is visible
   document.addEventListener('keydown', function(e) {
