@@ -282,14 +282,90 @@
 
     /* ── Salida a PDF ──────────────────────────────────────────────────── */
 
-    function toPdf(html, filename) {
-        return window.html2pdf().set({
-            margin: [9, 9, 9, 9],
-            filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: false, useCORS: true, allowTaint: true },
-            jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait', compress: true }
-        }).from(html, 'string').toPdf().get('pdf');
+    // Carta a 96 dpi = 816 × 1056 px. Con margen de 9 mm (≈34 px) el área
+    // útil es de 748 × 988 px, que es el ancho con el que se diseñaron las
+    // réplicas y con el que se miden al renderizarlas.
+    var PAGE = { w: 215.9, h: 279.4, margin: 9, pxWidth: 748 };
+
+    function getJsPDF() {
+        return (window.jspdf && window.jspdf.jsPDF) || window.jsPDF ||
+            (window.jsPDF && window.jsPDF.jsPDF);
+    }
+
+    // html2canvas captura lo que ya está pintado: hay que esperar a las imágenes.
+    function waitForImages(el) {
+        var imgs = Array.prototype.slice.call(el.querySelectorAll('img'));
+        return Promise.all(imgs.map(function (img) {
+            if (img.complete && img.naturalWidth) return Promise.resolve();
+            return new Promise(function (resolve) {
+                img.onload = img.onerror = resolve;
+                setTimeout(resolve, 3000);
+            });
+        }));
+    }
+
+    /**
+     * Genera el PDF pintando CADA hoja por separado.
+     *
+     * Antes se concatenaba todo en un solo HTML y se delegaba el corte a
+     * html2pdf, que ignoraba el salto de página y rebanaba el lienzo a media
+     * línea (el instructivo empezaba cortado en la primera hoja y el
+     * encabezado se recortaba). Al renderizar hoja por hoja el corte es
+     * exacto y el encabezado siempre queda completo.
+     *
+     * @param {string[]} pagesHtml Una entrada por hoja.
+     * @returns {Promise<object>} instancia jsPDF
+     */
+    async function renderPages(pagesHtml) {
+        var JsPDF = getJsPDF();
+        if (!JsPDF) throw new Error('No se encontró jsPDF para generar el documento.');
+
+        var contentW = PAGE.w - 2 * PAGE.margin;
+        var contentH = PAGE.h - 2 * PAGE.margin;
+
+        var holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;top:0;left:-10000px;width:' + PAGE.pxWidth +
+            'px;background:#fff;overflow:visible;';
+        document.body.appendChild(holder);
+
+        var pdf = null;
+        try {
+            for (var i = 0; i < pagesHtml.length; i++) {
+                holder.innerHTML = pagesHtml[i];
+                await waitForImages(holder);
+
+                var canvas = await window.html2canvas(holder, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    windowWidth: PAGE.pxWidth
+                });
+
+                // Ajustar a la caja útil conservando la proporción, de modo que
+                // una hoja más alta de lo previsto se reduzca en vez de cortarse.
+                var imgW = contentW;
+                var imgH = contentW * canvas.height / canvas.width;
+                if (imgH > contentH) {
+                    imgH = contentH;
+                    imgW = contentH * canvas.width / canvas.height;
+                }
+
+                if (!pdf) {
+                    pdf = new JsPDF({
+                        unit: 'mm', format: 'letter', orientation: 'portrait', compress: true
+                    });
+                } else {
+                    pdf.addPage('letter', 'portrait');
+                }
+                pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG',
+                    PAGE.margin, PAGE.margin, imgW, imgH);
+            }
+        } finally {
+            if (holder.parentNode) document.body.removeChild(holder);
+        }
+        return pdf;
     }
 
     window.MHRAfacFormKit = {
@@ -312,6 +388,7 @@
         instructivoHtml: instructivoHtml,
         appendMapPage: appendMapPage,
         appendMapsLinkPage: appendMapsLinkPage,
-        toPdf: toPdf
+        renderPages: renderPages,
+        PAGE: PAGE
     };
 })();

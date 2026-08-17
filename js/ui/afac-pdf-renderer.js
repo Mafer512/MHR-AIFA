@@ -296,10 +296,11 @@
         var k = kit();
         var logos = await k.loadLogos();
 
-        var html = '<div style="width:100%;">' + buildFormHtml(afac, folio, logos) +
-            '<div style="page-break-before:always;"></div>' + buildInstructivoHtml() + '</div>';
-
-        var pdf = await k.toPdf(html, 'AFAC-Impacto-Fauna-' + folio + '.pdf');
+        // Una entrada por hoja: el corte lo controla el kit, no html2pdf.
+        var pdf = await k.renderPages([
+            buildFormHtml(afac, folio, logos),
+            buildInstructivoHtml()
+        ]);
 
         await k.appendMapPage(pdf, afac.ubicacion_lat, afac.ubicacion_lng, folio,
             'Anexo AIFA — Ubicación del impacto con fauna');

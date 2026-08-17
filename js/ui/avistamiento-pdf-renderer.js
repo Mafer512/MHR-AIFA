@@ -264,10 +264,11 @@
         var k = kit();
         var logos = await k.loadLogos();
 
-        var html = '<div style="width:100%;">' + buildFormHtml(avi, folio, logos) +
-            '<div style="page-break-before:always;"></div>' + buildInstructivoHtml() + '</div>';
-
-        var pdf = await k.toPdf(html, 'AFAC-Avistamiento-Fauna-' + folio + '.pdf');
+        // Una entrada por hoja: el corte lo controla el kit, no html2pdf.
+        var pdf = await k.renderPages([
+            buildFormHtml(avi, folio, logos),
+            buildInstructivoHtml()
+        ]);
 
         await k.appendMapPage(pdf, avi.ubicacion_lat, avi.ubicacion_lng, folio,
             'Anexo AIFA — Ubicación del avistamiento de fauna');
