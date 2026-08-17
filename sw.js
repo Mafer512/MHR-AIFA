@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mhr-cache-v21';
+const CACHE_NAME = 'mhr-cache-v22';
 
 // Archivos del shell de la app que se cachean al instalar
 const SHELL_FILES = [
@@ -7,6 +7,9 @@ const SHELL_FILES = [
     './manifest.webmanifest',
     './js/mhr-utils.js',
     './logo.png',
+    // Logotipos oficiales de la forma AFAC-SA-FAUNA-I/ene-22
+    './assets/img/sict-logo.png',
+    './assets/img/afac-logo.png',
     './favicon-16.png',
     './favicon-32.png',
     './apple-touch-icon.png',

@@ -20,12 +20,25 @@
                 return { dataURL: p.dataURL, name: p.name || 'fauna.jpg' };
             });
         });
-        return { values: values, photos: photos, savedAt: Date.now() };
+        var activeTab = document.querySelector('.fauna-tab-content.active');
+        return {
+            values: values,
+            photos: photos,
+            activeTab: activeTab ? activeTab.getAttribute('data-fauna-tab-content') : null,
+            savedAt: Date.now()
+        };
     }
 
     function restore(draft) {
         var form = document.getElementById('fauna-form');
         if (!form || !draft || !draft.values) return;
+
+        // Restaurar la pestaña activa: determina qué reporte se vuelve a enviar
+        // (Impacto, Rescate o la notificación oficial AFAC).
+        if (draft.activeTab) {
+            var tabBtn = document.querySelector('.fauna-tab[data-fauna-tab="' + draft.activeTab + '"]');
+            if (tabBtn) tabBtn.click();
+        }
         Object.keys(draft.values).forEach(function (key) {
             var selector = '[name="' + CSS.escape(key) + '"],#' + CSS.escape(key);
             Array.prototype.forEach.call(form.querySelectorAll(selector), function (el) {

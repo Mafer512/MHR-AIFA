@@ -64,6 +64,11 @@ window.MHRSupabaseOrchestratorPage = (function () {
         window.MHRFaunaInteractionsPage.init({ cargarCatalogosFauna: window.cargarCatalogosFauna });
       }
 
+      // Notificación de Impacto con Fauna (forma oficial AFAC)
+      if (window.MHRFaunaAfacPage && typeof window.MHRFaunaAfacPage.init === 'function') {
+        window.MHRFaunaAfacPage.init();
+      }
+
       if (window.MHROfflineSyncPage && typeof window.MHROfflineSyncPage.init === 'function') {
         window.MHROfflineSyncPage.init({
           showOfflineBanner: window.showOfflineBanner,

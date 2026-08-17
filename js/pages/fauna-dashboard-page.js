@@ -37,6 +37,16 @@ window.MHRFaunaDashboardPage = (function () {
                                 pistaSection.style.display = 'block';
                             }
                         }
+
+                        // La forma oficial AFAC no lleva bloque de firmas: se oculta
+                        // y el botón de envío adopta el nombre del trámite.
+                        const isAfacTab = targetTab === 'afac';
+                        const firmasWrap = document.getElementById('fauna-firmas-wrap');
+                        if (firmasWrap) firmasWrap.style.display = isAfacTab ? 'none' : '';
+                        const faunaSubmitBtn = document.querySelector('#fauna-form input[type="submit"]');
+                        if (faunaSubmitBtn) {
+                            faunaSubmitBtn.value = isAfacTab ? 'Generar notificación AFAC' : 'Generar reporte';
+                        }
                     });
                 });
             })();
@@ -276,6 +286,36 @@ window.MHRFaunaDashboardPage = (function () {
             }
             function fesTopKey(pairs) { return pairs.length ? pairs[0][0] : '–'; }
 
+            // Igual que fesCountBy, pero un mismo registro puede aportar varios
+            // valores separados por coma (p. ej. varias partes del avión
+            // impactadas en una misma notificación AFAC).
+            function fesCountByMulti(arr, field) {
+                var idx = {};
+                arr.forEach(function(r){
+                    String(r[field] || '').split(',').forEach(function(raw){
+                        var v = raw.trim();
+                        if (!v) return;
+                        idx[v] = (idx[v] || 0) + 1;
+                    });
+                });
+                return Object.entries(idx).sort(function(a,b){ return b[1]-a[1]; });
+            }
+
+            // Cuenta valores de un arreglo de texto (columnas text[] de AFAC)
+            function fesCountByArray(arr, field, mapFn) {
+                var idx = {};
+                arr.forEach(function(r){
+                    var list = Array.isArray(r[field]) ? r[field] : [];
+                    list.forEach(function(raw){
+                        var v = mapFn ? mapFn(raw) : raw;
+                        v = String(v || '').trim();
+                        if (!v) return;
+                        idx[v] = (idx[v] || 0) + 1;
+                    });
+                });
+                return Object.entries(idx).sort(function(a,b){ return b[1]-a[1]; });
+            }
+
             function fesFillTable(tbodyId, rows, emptyMsg) {
                 var tb = document.getElementById(tbodyId);
                 if (!tb) return;
@@ -467,9 +507,11 @@ window.MHRFaunaDashboardPage = (function () {
                 var panGraf    = document.getElementById('fes-sub-graficas');
                 var panAero    = document.getElementById('fes-sub-aerolineas');
                 var panMapaImp = document.getElementById('fes-sub-mapa-imp');
+                var panAfac    = document.getElementById('fes-sub-afac');
                 var tGraf    = document.getElementById('fes-subtab-graficas');
                 var tAero    = document.getElementById('fes-subtab-aerolineas');
                 var tMapaImp = document.getElementById('fes-subtab-mapa-imp');
+                var tAfac    = document.getElementById('fes-subtab-afac');
                 // Rescates sub-tabs
                 var panResRes  = document.getElementById('fes-sub-res-resumen');
                 var panMapaRes = document.getElementById('fes-sub-mapa-res');
@@ -488,13 +530,15 @@ window.MHRFaunaDashboardPage = (function () {
                 }
 
                 // ── Impactos sub-tabs ────────────────────────────────────────
-                if (sub === 'graficas' || sub === 'aerolineas' || sub === 'mapa-imp') {
+                if (sub === 'graficas' || sub === 'aerolineas' || sub === 'mapa-imp' || sub === 'afac') {
                     if (panGraf)    panGraf.style.display    = sub === 'graficas'   ? '' : 'none';
                     if (panAero)    panAero.style.display    = sub === 'aerolineas' ? '' : 'none';
                     if (panMapaImp) panMapaImp.style.display = sub === 'mapa-imp'   ? '' : 'none';
-                    setInactive(tGraf); setInactive(tAero); setInactive(tMapaImp);
+                    if (panAfac)    panAfac.style.display    = sub === 'afac'       ? '' : 'none';
+                    setInactive(tGraf); setInactive(tAero); setInactive(tMapaImp); setInactive(tAfac);
                     if (sub === 'graficas')        setActive(tGraf,    '#dc2626');
                     else if (sub === 'aerolineas') setActive(tAero,    '#1d4ed8');
+                    else if (sub === 'afac')       setActive(tAfac,    '#0f766e');
                     else                            setActive(tMapaImp, '#0d9488');
                     if (sub === 'aerolineas' && window._fesLastImpData) fesRenderAerolineas(window._fesLastImpData);
                     if (sub === 'mapa-imp') {
@@ -503,6 +547,7 @@ window.MHRFaunaDashboardPage = (function () {
                             _refreshFesImpMap();
                         });
                     }
+                    if (sub === 'afac') loadAfacStatistics();
                 }
                 // ── Rescates sub-tabs ────────────────────────────────────────
                 else if (sub === 'res-resumen' || sub === 'mapa-res') {
@@ -995,8 +1040,10 @@ window.MHRFaunaDashboardPage = (function () {
                             c[2] + ' ' + f[0] + ' · <b>' + f[1] + '</b></span>';
                     }).join('') : '<span style="color:#94a3b8;font-size:12px;">Sin datos de fase</span>';
                 }
-                // Parte avión + Pista
-                fesFillTable('fes-imp-parte-tbody', fesCountBy(data, 'parte_avion'), 'Sin datos');
+                // Parte avión + Pista. La notificación AFAC puede registrar
+                // varias partes impactadas en un solo evento, por eso se cuentan
+                // por separado en lugar de tratar la lista como un único valor.
+                fesFillTable('fes-imp-parte-tbody', fesCountByMulti(data, 'parte_avion'), 'Sin datos');
                 fesFillTable('fes-imp-pista-tbody', fesCountBy(data, 'pista'), 'Sin datos');
             }
 
@@ -1257,6 +1304,95 @@ window.MHRFaunaDashboardPage = (function () {
             }
 
             // ── main stats loader ─────────────────────────────────────────────
+            // ── Estadística de la forma oficial AFAC-SA-FAUNA-I/ene-22 ──────
+            var PARTES_AFAC = {
+                A: 'Radomo', B: 'Parabrisas', C: 'Sección de Nariz', D: 'Motor No. 1',
+                E: 'Motor No. 2', F: 'Motor No. 3', G: 'Motor No. 4', H: 'Hélice',
+                I: 'Ala/Rotor', J: 'Fuselaje', K: 'Tren de Aterrizaje',
+                L: 'Sección de Cola', M: 'Luces', N: 'Otro'
+            };
+            var RANGOS_AFAC = ['1', '2-10', '11-100', 'más de 100'];
+
+            async function loadAfacStatistics() {
+                var client = window.supabaseClient;
+                if (!client || !window.MHRFaunaAfacService) return;
+
+                var data;
+                try {
+                    data = await window.MHRFaunaAfacService.getAfacReports(client, {});
+                } catch (err) {
+                    console.error('Error cargando la estadística AFAC:', err);
+                    return;
+                }
+                window._fesLastAfacData = data;
+
+                var setText = function (id, v) {
+                    var e = document.getElementById(id);
+                    if (e) e.textContent = v;
+                };
+
+                var conDano = data.filter(function (r) {
+                    return Array.isArray(r.partes_danadas) && r.partes_danadas.length > 0;
+                }).length;
+                var conEfecto = data.filter(function (r) {
+                    var ef = Array.isArray(r.efecto_operacion) ? r.efecto_operacion : [];
+                    return ef.some(function (v) { return v && v !== 'Ninguno'; });
+                }).length;
+                var advertidos = data.filter(function (r) { return r.piloto_advertido === true; }).length;
+
+                var fases = fesCountBy(data, 'fase_operacion');
+
+                setText('fes-afac-total', data.length);
+                setText('fes-afac-con-dano', conDano);
+                setText('fes-afac-efecto-op', conEfecto);
+                setText('fes-afac-advertido', advertidos + ' / ' + data.length);
+                setText('fes-afac-fase-top', fesTopKey(fases));
+
+                var mapParte = function (c) { return PARTES_AFAC[c] || c; };
+
+                fesFillTable('fes-afac-fase-tbody', fases, 'Sin notificaciones AFAC');
+                fesFillTable('fes-afac-efecto-tbody', fesCountByArray(data, 'efecto_operacion'), 'Sin datos');
+                fesFillTable('fes-afac-impactadas-tbody', fesCountByArray(data, 'partes_impactadas', mapParte), 'Sin partes registradas');
+                fesFillTable('fes-afac-danadas-tbody', fesCountByArray(data, 'partes_danadas', mapParte), 'Sin daños registrados');
+                fesFillTable('fes-afac-luz-tbody', fesCountBy(data, 'luz_solar'), 'Sin datos');
+                fesFillTable('fes-afac-tamano-tbody', fesCountBy(data, 'tamano_ejemplares'), 'Sin datos');
+                fesFillTable('fes-afac-cielo-tbody', fesCountBy(data, 'condicion_cielo'), 'Sin datos');
+                fesFillTable('fes-afac-precip-tbody', fesCountBy(data, 'precipitacion'), 'Sin datos');
+
+                // Avistados vs impactados, por rango de la casilla 22
+                var avist = {}, impac = {};
+                data.forEach(function (r) {
+                    if (r.ejemplares_avistados) avist[r.ejemplares_avistados] = (avist[r.ejemplares_avistados] || 0) + 1;
+                    if (r.ejemplares_impactados) impac[r.ejemplares_impactados] = (impac[r.ejemplares_impactados] || 0) + 1;
+                });
+                var ejemplaresRows = RANGOS_AFAC
+                    .map(function (r) { return [r, avist[r] || 0, impac[r] || 0]; })
+                    .filter(function (row) { return row[1] || row[2]; });
+                fesFill3ColTable('fes-afac-ejemplares-tbody', ejemplaresRows, 'Sin datos de ejemplares');
+
+                // Perfil de altura y velocidad
+                var alturas = data.map(function (r) { return r.altura_agl; })
+                    .filter(function (v) { return typeof v === 'number' && !isNaN(v); });
+                var vels = data.map(function (r) { return r.velocidad_ias; })
+                    .filter(function (v) { return typeof v === 'number' && !isNaN(v); });
+                var avg = function (a) { return a.length ? Math.round(a.reduce(function (s, v) { return s + v; }, 0) / a.length) : null; };
+                var perfil = document.getElementById('fes-afac-perfil');
+                if (perfil) {
+                    if (!alturas.length && !vels.length) {
+                        perfil.innerHTML = '<span style="color:#94a3b8;">Sin datos de altura ni velocidad</span>';
+                    } else {
+                        var line = function (label, arr, unit) {
+                            if (!arr.length) return '<div><b>' + label + ':</b> <span style="color:#94a3b8;">sin datos</span></div>';
+                            return '<div><b>' + label + ':</b> promedio ' + avg(arr) + ' ' + unit +
+                                ' · mín ' + Math.min.apply(null, arr) + ' · máx ' + Math.max.apply(null, arr) +
+                                ' <span style="color:#94a3b8;">(' + arr.length + ' reportes)</span></div>';
+                        };
+                        perfil.innerHTML = line('Altura AGL', alturas, 'ft') + line('Velocidad IAS', vels, 'kt');
+                    }
+                }
+            }
+            window.loadAfacStatistics = loadAfacStatistics;
+
             async function loadFaunaStatistics() {
                 const client = window.supabaseClient;
                 if (!client) { console.error('Supabase client not ready'); return; }
@@ -1718,6 +1854,7 @@ window.MHRFaunaDashboardPage = (function () {
 
             // Event listener para el botón de actualizar estadísticas de fauna
             document.getElementById('refresh-estadisticas-fauna-btn')?.addEventListener('click', loadFaunaStatistics);
+            document.getElementById('refresh-estadisticas-afac-btn')?.addEventListener('click', loadAfacStatistics);
 
             // Exponer para uso externo (fauna-submit-page, supabase-orchestrator)
             window.loadFaunaReports = loadFaunaReports;

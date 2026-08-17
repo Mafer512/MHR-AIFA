@@ -1,0 +1,485 @@
+/* ============================================================
+   REPLICA DIGITAL - FORMA AFAC-SA-FAUNA-I/ene-22
+   "Notificacion de Impacto con Fauna"
+   Agencia Federal de Aviacion Civil
+   ============================================================ */
+
+.afac-form {
+    --afac-line: #4b5563;
+    --afac-ink: #111827;
+    --afac-field: #fffdf5;
+    --afac-field-focus: #eef6ff;
+    font-family: "Inter", Arial, Helvetica, sans-serif;
+    color: var(--afac-ink);
+    max-width: 100%;
+}
+
+/* El ancho de las casillas se reparte en porcentajes, igual que en el
+   formato impreso: sin border-box el relleno desbordaría la fila. */
+.afac-form,
+.afac-form *,
+.afac-form *::before,
+.afac-form *::after {
+    box-sizing: border-box;
+}
+
+/* Encabezado oficial (logos + titulos) */
+.afac-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 4px 10px;
+}
+
+.afac-header img {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.afac-header .afac-header-sict {
+    height: 30px;
+}
+
+.afac-header-titles {
+    flex: 1 1 auto;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.afac-header-titles div {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    color: #111827;
+    text-transform: uppercase;
+}
+
+.afac-forma-code {
+    text-align: right;
+    font-size: 10px;
+    font-weight: 700;
+    color: #111827;
+    padding: 0 4px 6px 0;
+    letter-spacing: .3px;
+}
+
+/* Rejilla de casillas */
+.afac-grid {
+    border: 1.4px solid var(--afac-line);
+    border-radius: 2px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.afac-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    border-bottom: 1.4px solid var(--afac-line);
+}
+
+.afac-row:last-child {
+    border-bottom: none;
+}
+
+.afac-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 7px 10px;
+    min-width: 0;
+    flex: 1 1 190px;
+    border-right: 1.4px solid var(--afac-line);
+}
+
+.afac-cell:last-child {
+    border-right: none;
+}
+
+.afac-cell.afac-cell-block {
+    display: block;
+    flex-basis: 100%;
+}
+
+/* Etiqueta numerada de casilla, p.ej. "1. Explotador:" */
+.afac-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #111827;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+.afac-label-wrap {
+    white-space: normal;
+}
+
+/* Campos de captura */
+.afac-form input[type="text"],
+.afac-form input[type="date"],
+.afac-form input[type="number"],
+.afac-form textarea {
+    flex: 1 1 90px;
+    min-width: 0;
+    width: 100%;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--afac-ink);
+    padding: 5px 7px;
+    border: 1.2px solid var(--afac-line);
+    border-radius: 2px;
+    background: var(--afac-field);
+    transition: border-color .15s, background .15s, box-shadow .15s;
+}
+
+.afac-form textarea {
+    display: block;
+    resize: vertical;
+    min-height: 62px;
+    line-height: 1.45;
+}
+
+.afac-form input[type="text"]:focus,
+.afac-form input[type="date"]:focus,
+.afac-form input[type="number"]:focus,
+.afac-form textarea:focus {
+    outline: none;
+    border-color: #1d4ed8;
+    background: var(--afac-field-focus);
+    box-shadow: 0 0 0 2px rgba(29, 78, 216, .16);
+}
+
+.afac-form input.afac-narrow {
+    flex: 0 1 130px;
+}
+
+/* Campo autocompletado (folio, fecha del reporte) */
+.afac-form input[readonly] {
+    background: #f1f5f9;
+    color: #475569;
+    cursor: default;
+}
+
+/* Casillas de verificacion estilo formulario oficial */
+.afac-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--afac-ink);
+    cursor: pointer;
+    user-select: none;
+    padding: 3px 2px;
+    line-height: 1.3;
+}
+
+.afac-check input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 0 0 auto;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    border: 1.4px solid var(--afac-line);
+    border-radius: 2px;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: background .12s, border-color .12s;
+}
+
+.afac-check input:checked {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.afac-check input:checked::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0.5px;
+    width: 4px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(42deg);
+}
+
+.afac-check input:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+}
+
+.afac-check:hover input {
+    border-color: #1d4ed8;
+}
+
+.afac-check.afac-check-on {
+    font-weight: 700;
+    color: #1d4ed8;
+}
+
+/* Fila de opciones repartidas (Luz solar, Precipitacion, ...) */
+.afac-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    flex: 1 1 auto;
+}
+
+.afac-options .afac-check {
+    flex: 1 1 150px;
+}
+
+.afac-options-tight .afac-check {
+    flex: 0 0 auto;
+}
+
+/* Reparto en columnas fijas, como en el formato impreso */
+.afac-options-quad,
+.afac-options-tri {
+    gap: 4px 10px;
+}
+
+.afac-options-quad .afac-check {
+    flex: 1 1 21%;
+}
+
+.afac-options-tri .afac-check {
+    flex: 1 1 29%;
+}
+
+/* Casilla 16 - Partes impactadas o danadas */
+.afac-partes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 26px;
+    padding: 4px 10px 10px;
+}
+
+.afac-partes-col {
+    min-width: 0;
+}
+
+.afac-partes-head,
+.afac-partes-item {
+    display: grid;
+    grid-template-columns: 1fr 76px 76px;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+}
+
+.afac-partes-head {
+    font-size: 10px;
+    font-weight: 700;
+    color: #374151;
+    border-bottom: 1px solid #d1d5db;
+    margin-bottom: 3px;
+    padding-bottom: 5px;
+}
+
+.afac-partes-head span:first-child {
+    visibility: hidden;
+}
+
+.afac-partes-head span {
+    text-align: center;
+}
+
+.afac-partes-item > span:first-child {
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.afac-partes-item .afac-check {
+    justify-content: center;
+    padding: 2px;
+}
+
+.afac-partes-item:nth-child(even) {
+    background: #fafafa;
+}
+
+/* Casilla 22 - Numero de ejemplares */
+.afac-ejemplares {
+    display: grid;
+    grid-template-columns: 1fr 84px 84px;
+    align-items: center;
+    gap: 4px 6px;
+    max-width: 340px;
+}
+
+.afac-ejemplares > .afac-ejemplares-head {
+    font-size: 10px;
+    font-weight: 700;
+    color: #374151;
+    text-align: center;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 4px;
+}
+
+.afac-ejemplares > .afac-ejemplares-head:first-child {
+    visibility: hidden;
+}
+
+.afac-ejemplares > span {
+    font-size: 12px;
+}
+
+.afac-ejemplares .afac-check {
+    justify-content: center;
+}
+
+/* Bloques auxiliares */
+.afac-sub {
+    display: block;
+    font-size: 10.5px;
+    color: #6b7280;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.afac-inline-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 100%;
+    margin-top: 6px;
+}
+
+.afac-inline-field .afac-label {
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.afac-nota {
+    font-size: 10.5px;
+    line-height: 1.55;
+    color: #374151;
+    padding: 10px 12px;
+    background: #f8fafc;
+    text-align: justify;
+}
+
+/* Apartado extra (no oficial): ubicacion en mapa */
+.afac-extra {
+    margin-top: 18px;
+    border: 1.4px dashed #1d4ed8;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(29, 78, 216, .04), rgba(248, 250, 252, .8));
+    padding: 14px 16px;
+}
+
+.afac-extra-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #1d4ed8;
+    letter-spacing: .4px;
+    margin-bottom: 4px;
+}
+
+.afac-extra-hint {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.afac-extra input[readonly] {
+    cursor: pointer;
+    background: #fff;
+}
+
+.afac-map-thumb {
+    display: none;
+    margin-top: 10px;
+    max-width: 320px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+}
+
+/* Barra de estado / validacion */
+.afac-status {
+    display: none;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.afac-status.afac-status-error {
+    display: block;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.afac-status.afac-status-ok {
+    display: block;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.afac-invalid {
+    border-color: #dc2626 !important;
+    background: #fef2f2 !important;
+}
+
+/* Responsivo */
+@media (max-width: 780px) {
+    .afac-partes {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .afac-partes-col + .afac-partes-col {
+        margin-top: 10px;
+    }
+
+    .afac-cell {
+        flex-basis: 100%;
+        border-right: none;
+        border-bottom: 1px dashed #d1d5db;
+    }
+
+    .afac-cell:last-child {
+        border-bottom: none;
+    }
+
+    .afac-row {
+        border-bottom: 1.4px solid var(--afac-line);
+    }
+
+    .afac-header {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .afac-header-titles div {
+        font-size: 11.5px;
+    }
+}
+
+@media (max-width: 520px) {
+    .afac-options .afac-check {
+        flex: 1 1 100%;
+    }
+
+    .afac-partes-head,
+    .afac-partes-item {
+        grid-template-columns: 1fr 58px 58px;
+    }
+
+    .afac-ejemplares {
+        grid-template-columns: 1fr 64px 64px;
+    }
+}

@@ -33,9 +33,33 @@ window.MHRFaunaSubmitPage = (function () {
                         // ═════════════════ DETECTAR PESTAÑA ACTIVA ═════════════════
                         var impactoTab = document.querySelector('.fauna-tab-content[data-fauna-tab-content="impacto"]');
                         var rescateTab = document.querySelector('.fauna-tab-content[data-fauna-tab-content="rescate"]');
+                        var afacTab    = document.querySelector('.fauna-tab-content[data-fauna-tab-content="afac"]');
                         var isImpacto = impactoTab && impactoTab.classList.contains('active');
                         var isRescate = rescateTab && rescateTab.classList.contains('active');
-                        
+                        var isAfac    = afacTab && afacTab.classList.contains('active');
+
+                        // ═══ Notificación de Impacto con Fauna (forma oficial AFAC) ═══
+                        if (isAfac) {
+                            try {
+                                await window.MHRFaunaAfacSubmitPage.submit({
+                                    client: window.supabaseClient,
+                                    folio: folio
+                                });
+                            } catch (afacErr) {
+                                console.error('Error en la notificación AFAC:', afacErr);
+                                if (window.MHRFaunaAfacPage) {
+                                    window.MHRFaunaAfacPage.showStatus('Error: ' + (afacErr.message || afacErr), 'error');
+                                } else {
+                                    alert('Error: ' + (afacErr.message || afacErr));
+                                }
+                            } finally {
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar notificación AFAC';
+                                }
+                            }
+                            return;
+                        }
 
                         var client = window.supabaseClient;
                         if (!client) {
