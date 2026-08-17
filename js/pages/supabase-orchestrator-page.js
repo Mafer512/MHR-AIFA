@@ -69,6 +69,11 @@ window.MHRSupabaseOrchestratorPage = (function () {
         window.MHRFaunaAfacPage.init();
       }
 
+      // Notificación de Avistamiento de Fauna (forma oficial AFAC)
+      if (window.MHRFaunaAvistamientoPage && typeof window.MHRFaunaAvistamientoPage.init === 'function') {
+        window.MHRFaunaAvistamientoPage.init();
+      }
+
       if (window.MHROfflineSyncPage && typeof window.MHROfflineSyncPage.init === 'function') {
         window.MHROfflineSyncPage.init({
           showOfflineBanner: window.showOfflineBanner,

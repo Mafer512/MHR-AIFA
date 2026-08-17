@@ -34,9 +34,34 @@ window.MHRFaunaSubmitPage = (function () {
                         var impactoTab = document.querySelector('.fauna-tab-content[data-fauna-tab-content="impacto"]');
                         var rescateTab = document.querySelector('.fauna-tab-content[data-fauna-tab-content="rescate"]');
                         var afacTab    = document.querySelector('.fauna-tab-content[data-fauna-tab-content="afac"]');
+                        var avistTab   = document.querySelector('.fauna-tab-content[data-fauna-tab-content="avistamiento"]');
                         var isImpacto = impactoTab && impactoTab.classList.contains('active');
                         var isRescate = rescateTab && rescateTab.classList.contains('active');
                         var isAfac    = afacTab && afacTab.classList.contains('active');
+                        var isAvist   = avistTab && avistTab.classList.contains('active');
+
+                        // ═══ Notificación de Avistamiento de Fauna (forma oficial AFAC) ═══
+                        if (isAvist) {
+                            try {
+                                await window.MHRFaunaAvistamientoSubmitPage.submit({
+                                    client: window.supabaseClient,
+                                    folio: folio
+                                });
+                            } catch (avistErr) {
+                                console.error('Error en la notificación de avistamiento:', avistErr);
+                                if (window.MHRFaunaAvistamientoPage) {
+                                    window.MHRFaunaAvistamientoPage.showStatus('Error: ' + (avistErr.message || avistErr), 'error');
+                                } else {
+                                    alert('Error: ' + (avistErr.message || avistErr));
+                                }
+                            } finally {
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar notificación de avistamiento';
+                                }
+                            }
+                            return;
+                        }
 
                         // ═══ Notificación de Impacto con Fauna (forma oficial AFAC) ═══
                         if (isAfac) {

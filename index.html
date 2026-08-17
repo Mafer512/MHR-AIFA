@@ -867,6 +867,7 @@
                     <button type="button" class="fauna-tab active" data-fauna-tab="impacto" data-fauna-title="📊 Registro de Impacto o Posible Impacto">📊 Registro de Impacto o Posible Impacto</button>
                     <button type="button" class="fauna-tab" data-fauna-tab="rescate" data-fauna-title="🛟 Registro de Fauna Rescatada y Reubicada">🛟 Registro de Fauna Rescatada y Reubicada</button>
                     <button type="button" class="fauna-tab" data-fauna-tab="afac" data-fauna-title="📋 Notificación AFAC de Impacto con Fauna">📋 Notificación AFAC</button>
+                    <button type="button" class="fauna-tab" data-fauna-tab="avistamiento" data-fauna-title="🔍 Notificación AFAC de Avistamiento de Fauna">🔍 Avistamiento AFAC</button>
                 </div>
                 <div id="fauna_turno-section" style="display:none; margin-top:8px;">
                     <h3>Turno</h3>
@@ -1398,6 +1399,241 @@
                             <img class="afac-map-thumb" id="afac-map-thumb" alt="Vista del punto seleccionado">
                         </div>
                         <div class="afac-status" id="afac-status" role="status" aria-live="polite"></div>
+                    </div>
+                </div>
+                <!-- TAB 4: Notificacion de Avistamiento de Fauna (Forma oficial AFAC-SA-FAUNA-A/ene-22) -->
+                <div class="fauna-tab-content" data-fauna-tab-content="avistamiento">
+                    <div class="afac-form" id="avi-form-wrap">
+                        <div class="afac-header">
+                            <img class="afac-header-sict" src="./assets/img/sict-logo.png" alt="Secretar&iacute;a de Infraestructura, Comunicaciones y Transportes">
+                            <div class="afac-header-titles">
+                                <div>Agencia Federal de Aviaci&oacute;n Civil</div>
+                                <div>Direcci&oacute;n Ejecutiva de Seguridad A&eacute;rea</div>
+                                <div>Notificaci&oacute;n de Avistamiento de Fauna</div>
+                            </div>
+                            <img src="./assets/img/afac-logo.png" alt="Agencia Federal de Aviaci&oacute;n Civil">
+                        </div>
+                        <div class="afac-forma-code">FORMA: AFAC-SA-FAUNA-A/ene-22</div>
+                        <div class="afac-grid">
+                            <div class="afac-row">
+                                <div class="afac-cell" style="flex:1 1 55%;"><span class="afac-label">1. Fecha del Evento (dd/mm/aaaa):</span><input type="date" name="avi_fecha_evento" data-afac-required="Fecha del Evento"></div>
+                                <div class="afac-cell" style="flex:1 1 45%;"><span class="afac-label">2. Hora Local del Evento:</span>
+                                    <input type="text" class="afac-narrow" name="avi_hora_evento" placeholder="HH:MM" inputmode="numeric" maxlength="5" data-afac-required="Hora Local del Evento">
+                                    <span class="afac-options afac-options-tight" style="flex:0 0 auto;">
+                                        <label class="afac-check"><input type="radio" name="avi_meridiano" value="AM"> AM</label>
+                                        <label class="afac-check"><input type="radio" name="avi_meridiano" value="PM"> PM</label>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <span class="afac-label">3. Luz solar:</span>
+                                        <span class="afac-options afac-options-quad">
+                                            <label class="afac-check"><input type="radio" name="avi_luz_solar" value="Amanecer"> Amanecer</label>
+                                            <label class="afac-check"><input type="radio" name="avi_luz_solar" value="Día"> D&iacute;a</label>
+                                            <label class="afac-check"><input type="radio" name="avi_luz_solar" value="Anochecer"> Anochecer</label>
+                                            <label class="afac-check"><input type="radio" name="avi_luz_solar" value="Noche"> Noche</label>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block" style="flex:1 1 28%; padding:0; border-right:1.4px solid var(--afac-line);">
+                                    <div class="afac-row">
+                                        <div class="afac-cell"><span class="afac-label">4. Aer&oacute;dromo:</span><input type="text" name="avi_aerodromo" value="MMSM" title="C&oacute;digo OACI del aer&oacute;dromo" style="text-transform:uppercase;"></div>
+                                    </div>
+                                    <div class="afac-row" style="border-bottom:none;">
+                                        <div class="afac-cell"><span class="afac-label">5. Altura (AGL):</span><input type="text" name="avi_altura_agl" placeholder="pies o N/A" title="Altura estimada de la fauna observada; N/A si es fauna terrestre"></div>
+                                    </div>
+                                </div>
+                                <div class="afac-cell" style="flex:1 1 40%; align-items:flex-start;">
+                                    <span class="afac-label afac-label-wrap">6. Ubicaci&oacute;n en<br>Aer&oacute;dromo:</span>
+                                    <textarea name="avi_ubicacion_aerodromo" rows="2" placeholder="Ubicaci&oacute;n aproximada dentro del aer&oacute;dromo (N/A si no aplica)"></textarea>
+                                </div>
+                                <div class="afac-cell" style="flex:1 1 32%; align-items:flex-start;">
+                                    <span class="afac-label afac-label-wrap">7. Ubicaci&oacute;n<br>en Ruta:</span>
+                                    <textarea name="avi_ubicacion_ruta" rows="2" placeholder="Aerov&iacute;as, radiales, puntos de reporte&hellip; (N/A si no aplica)"></textarea>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block" style="flex:1 1 44%; border-right:1.4px solid var(--afac-line);">
+                                    <span class="afac-label">8. &iquest;Se encontraron restos de fauna muerta?</span>
+                                    <div class="afac-options afac-options-tri" style="margin-top:6px; padding-left:10px;">
+                                        <label class="afac-check"><input type="radio" name="avi_restos_fauna" value="Si"> Si</label>
+                                        <label class="afac-check"><input type="radio" name="avi_restos_fauna" value="No"> No</label>
+                                    </div>
+                                </div>
+                                <div class="afac-cell" style="flex:1 1 56%; align-items:flex-start;">
+                                    <span class="afac-label afac-label-wrap">Descripci&oacute;n de<br>los restos:</span>
+                                    <textarea name="avi_restos_descripcion" rows="2" disabled placeholder="Se habilita al responder &laquo;Si&raquo;"></textarea>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block" style="flex:1 1 44%; border-right:1.4px solid var(--afac-line);">
+                                    <span class="afac-label">9. &iquest;Se presentaron efectos en la(s) operaci&oacute;n(es)?</span>
+                                    <div class="afac-options afac-options-tri" style="margin-top:6px; padding-left:10px;">
+                                        <label class="afac-check"><input type="radio" name="avi_efectos_operacion" value="Si"> Si</label>
+                                        <label class="afac-check"><input type="radio" name="avi_efectos_operacion" value="No"> No</label>
+                                    </div>
+                                </div>
+                                <div class="afac-cell" style="flex:1 1 56%; align-items:flex-start;">
+                                    <span class="afac-label afac-label-wrap">Descripci&oacute;n de<br>los efectos:</span>
+                                    <textarea name="avi_efectos_descripcion" rows="2" disabled placeholder="Se habilita al responder &laquo;Si&raquo;"></textarea>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <span class="afac-label">10. Condici&oacute;n del Cielo:</span>
+                                        <span class="afac-options afac-options-tri">
+                                            <label class="afac-check"><input type="radio" name="avi_condicion_cielo" value="Despejado"> Despejado</label>
+                                            <label class="afac-check"><input type="radio" name="avi_condicion_cielo" value="Medio Nublado"> Medio Nublado</label>
+                                            <label class="afac-check"><input type="radio" name="avi_condicion_cielo" value="Nublado"> Nublado</label>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <span class="afac-label">11. Precipitaci&oacute;n:</span>
+                                        <span class="afac-options afac-options-quad">
+                                            <label class="afac-check"><input type="radio" name="avi_precipitacion" value="Niebla"> Niebla</label>
+                                            <label class="afac-check"><input type="radio" name="avi_precipitacion" value="Lluvia"> Lluvia</label>
+                                            <label class="afac-check"><input type="radio" name="avi_precipitacion" value="Nieve"> Nieve</label>
+                                            <label class="afac-check"><input type="radio" name="avi_precipitacion" value="Ninguna"> Ninguna</label>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <span class="afac-label">12. Temperatura Ambiente Estimada:</span>
+                                        <span class="afac-options afac-options-tri">
+                                            <label class="afac-check"><input type="radio" name="avi_temperatura" value="Menor a 10°C"> Menor a 10&deg;C</label>
+                                            <label class="afac-check"><input type="radio" name="avi_temperatura" value="De 10°C a 20°C"> De 10&deg;C a 20&deg;C</label>
+                                            <label class="afac-check"><input type="radio" name="avi_temperatura" value="Mayor a 20°C"> Mayor a 20&deg;C</label>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <span class="afac-label">13. Viento Estimado:</span>
+                                        <span class="afac-options afac-options-quad">
+                                            <label class="afac-check"><input type="radio" name="avi_viento" value="Calma (0 kts)"> Calma (0 kts)</label>
+                                            <label class="afac-check"><input type="radio" name="avi_viento" value="Ligero (menor a 3 kts)"> Ligero (menor a 3 kts)</label>
+                                            <label class="afac-check"><input type="radio" name="avi_viento" value="Moderado (3 a 10 kts)"> Moderado (3 a 10 kts)</label>
+                                            <label class="afac-check"><input type="radio" name="avi_viento" value="Fuerte (mayor a 10 kts)"> Fuerte (mayor a 10 kts)</label>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell" style="flex:1 1 44%;">
+                                    <span class="afac-label">14. Especie de Fauna:</span>
+                                    <input type="text" name="avi_especie" list="avi-especie-options" autocomplete="off" placeholder="Especie avistada">
+                                </div>
+                                <div class="afac-cell" style="flex:1 1 56%;">
+                                    <span class="afac-label">15. Tama&ntilde;o del (los) Ejemplar(es):</span>
+                                    <span class="afac-options afac-options-tight">
+                                        <label class="afac-check" title="masa corporal menor a 1 kg"><input type="radio" name="avi_tamano" value="Pequeño(s)"> Peque&ntilde;o(s)</label>
+                                        <label class="afac-check" title="masa de entre 1 kg y 5 kg"><input type="radio" name="avi_tamano" value="Mediano(s)"> Mediano(s)</label>
+                                        <label class="afac-check" title="masa mayor a 5 kg"><input type="radio" name="avi_tamano" value="Grande(s)"> Grande(s)</label>
+                                    </span>
+                                </div>
+                            </div>
+                            <datalist id="avi-especie-options">
+                                <option value="Alondra cornuda (Eremophila alpestris)"></option>
+                                <option value="Bisbita norteamericana (Anthus rubescens)"></option>
+                                <option value="Tecolote llanero (Athene cunicularia)"></option>
+                                <option value="Playero blanco (Calidris alba)"></option>
+                                <option value="Playero de Baird (Calidris bairdii)"></option>
+                                <option value="Chorlo tildío (Charadrius vociferus)"></option>
+                                <option value="Cernicalo americano (Falco sparverius)"></option>
+                                <option value="Pinzón mexicano (Haemorhous mexicanus)"></option>
+                                <option value="Golondrina tijereta (Hirundo rustica)"></option>
+                                <option value="Liebre cola negra (Lepus californicus)"></option>
+                                <option value="Gorrión común (Passer domesticus)"></option>
+                                <option value="Gorrión sabanero (Passerculus sandwichensis)"></option>
+                                <option value="Zacatonero de Boterii (Peucaea botterii)"></option>
+                                <option value="Zanate mexicano (Quiscalus mexicanus)"></option>
+                                <option value="Pradero tortillaconchile (Sturnella magna)"></option>
+                                <option value="Lechuza de campanario (Tyto furcata)"></option>
+                                <option value="Tordo cabeza amarilla (Xanthocephalus xanthochephalus)"></option>
+                                <option value="Huilota común (Zenaida macroura)"></option>
+                            </datalist>
+                            <div class="afac-row">
+                                <div class="afac-cell" style="align-items:flex-start;">
+                                    <span class="afac-label afac-label-wrap" style="flex:0 0 190px;">16. Caracter&iacute;sticas de la Fauna Avistada (en caso de no conocer la especie):</span>
+                                    <textarea name="avi_caracteristicas" rows="2" placeholder="Tama&ntilde;o, color, plumaje, comportamiento&hellip; (N/A si se conoce la especie)"></textarea>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block" style="flex:1 1 40%; border-right:1.4px solid var(--afac-line);">
+                                    <span class="afac-label">17. N&uacute;mero de Ejemplares Avistados</span>
+                                    <div class="afac-ejemplares" style="margin-top:6px; grid-template-columns:1fr 84px;">
+                                        <span class="afac-ejemplares-head">Rango</span>
+                                        <span class="afac-ejemplares-head">Avistados</span>
+                                        <span>1</span>
+                                        <label class="afac-check"><input type="radio" name="avi_ejemplares" value="1"></label>
+                                        <span>2-10</span>
+                                        <label class="afac-check"><input type="radio" name="avi_ejemplares" value="2-10"></label>
+                                        <span>11-100</span>
+                                        <label class="afac-check"><input type="radio" name="avi_ejemplares" value="11-100"></label>
+                                        <span>m&aacute;s de 100</span>
+                                        <label class="afac-check"><input type="radio" name="avi_ejemplares" value="más de 100"></label>
+                                    </div>
+                                </div>
+                                <div class="afac-cell" style="flex:1 1 60%; align-items:flex-start;">
+                                    <span class="afac-label afac-label-wrap" style="flex:0 0 120px;">18. Descripci&oacute;n del Comportamiento de la Fauna Avistada:</span>
+                                    <textarea name="avi_comportamiento" rows="4" placeholder="Comportamiento observado de la fauna"></textarea>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block">
+                                    <div style="display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+                                        <span class="afac-label afac-label-wrap" style="flex:0 0 180px;">19. Probables Atrayentes de Fauna en la Cercan&iacute;a:</span>
+                                        <span class="afac-options afac-options-tri" style="flex:1 1 320px;">
+                                            <label class="afac-check"><input type="checkbox" name="avi_atrayentes" value="A"> A. Vertedero de basura</label>
+                                            <label class="afac-check"><input type="checkbox" name="avi_atrayentes" value="B"> B. Cuerpo de agua</label>
+                                            <label class="afac-check"><input type="checkbox" name="avi_atrayentes" value="C"> C. Vegetaci&oacute;n</label>
+                                            <label class="afac-check"><input type="checkbox" name="avi_atrayentes" value="E"> E. Actividades Agr&iacute;colas</label>
+                                            <label class="afac-check"><input type="checkbox" name="avi_atrayentes" value="F"> F. Actividades Comerciales</label>
+                                            <label class="afac-check"><input type="checkbox" name="avi_atrayentes" value="G"> G. Otro</label>
+                                        </span>
+                                    </div>
+                                    <div class="afac-inline-field" style="align-items:flex-start;">
+                                        <span class="afac-label afac-label-wrap" style="flex:0 0 150px;">Descripci&oacute;n de los probables atrayentes:</span>
+                                        <textarea name="avi_atrayentes_descripcion" rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell" style="flex:1 1 58%;"><span class="afac-label">20. Reportado por:</span><input type="text" name="avi_reportado_por" list="afac-responsable-options" autocomplete="off" data-afac-required="Reportado por"></div>
+                                <div class="afac-cell" style="flex:1 1 42%;"><span class="afac-label">21. Puesto:</span><input type="text" name="avi_puesto" list="afac-puesto-options" autocomplete="off"></div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell" style="flex:1 1 55%;"><span class="afac-label">22. Empresa:</span><input type="text" name="avi_empresa" value="Aeropuerto Internacional Felipe &Aacute;ngeles"></div>
+                                <div class="afac-cell" style="flex:1 1 45%;"><span class="afac-label">23. Fecha del Reporte (dd/mm/aaaa):</span><input type="date" name="avi_fecha_reporte"></div>
+                            </div>
+                            <div class="afac-row">
+                                <div class="afac-cell afac-cell-block" style="padding:0;">
+                                    <p class="afac-nota">Este formulario debe ser entregado a la Autoridad Aeron&aacute;utica representada por cualquiera de las Comandancias de Aeropuerto de la red aeroportuaria nacional. La Comandancia de Aeropuerto que reciba este formulario debidamente requisitado, debe validarlo, registrarlo en el sistema electr&oacute;nico determinado por la Autoridad Aeron&aacute;utica representada por el &Aacute;rea Central y debe archivarlo f&iacute;sicamente para los fines que correspondan.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="afac-extra">
+                            <div class="afac-extra-title">&#128205; Apartado adicional AIFA &mdash; Ubicaci&oacute;n exacta del avistamiento</div>
+                            <div class="afac-extra-hint">No forma parte de la forma oficial AFAC. Permite georreferenciar el avistamiento y anexar el mapa satelital al PDF.</div>
+                            <label style="display:block; font-size:11px; font-weight:700; color:#334155; margin-bottom:4px;">Coordenadas del avistamiento</label>
+                            <input type="text" name="avi_ubicacion[lugar]" placeholder="Click para seleccionar en mapa" readonly style="max-width:320px;">
+                            <img class="afac-map-thumb" id="avi-map-thumb" alt="Vista del punto seleccionado">
+                        </div>
+                        <div class="afac-status" id="avi-status" role="status" aria-live="polite"></div>
                     </div>
                 </div>
                 <div id="fauna-firmas-wrap">
@@ -2564,9 +2800,11 @@
     <script src="./js/pages/fauna-form-page.js"></script>
     <script src="./js/pages/fauna-interactions-page.js"></script>
     <script src="./js/pages/fauna-afac-page.js"></script>
+    <script src="./js/pages/fauna-avistamiento-page.js"></script>
     <script src="./js/pages/offline-sync-page.js"></script>
     <script src="./js/services/fauna-report-service.js"></script>
     <script src="./js/services/fauna-afac-service.js"></script>
+    <script src="./js/services/fauna-avistamiento-service.js"></script>
     <script src="./js/services/fauna-catalog-service.js"></script>
     <script src="./js/services/catalog-service.js"></script>
     <script src="./js/services/user-service.js"></script>
@@ -2586,7 +2824,9 @@
     <!-- jsPDF CDN (para generación de PDF directo sin html2pdf) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="./js/ui/pdf-renderer.js"></script>
+    <script src="./js/ui/afac-form-kit.js"></script>
     <script src="./js/ui/afac-pdf-renderer.js"></script>
+    <script src="./js/ui/avistamiento-pdf-renderer.js"></script>
     <script src="./js/pages/revision-page.js"></script>
     <script src="./js/pages/app-bootstrap-page.js"></script>
     <script src="./js/pages/form-state-page.js"></script>
@@ -2625,6 +2865,7 @@
     <script src="./js/pages/offline-fauna-sync-page.js"></script>
     <script src="./js/pages/fauna-submit-page.js"></script>
     <script src="./js/pages/fauna-afac-submit-page.js"></script>
+    <script src="./js/pages/fauna-avistamiento-submit-page.js"></script>
     <script src="./js/pages/fauna-dashboard-page.js"></script>
     <script src="./js/pages/estadistica-so-page.js"></script>
     <script src="./js/pages/supabase-orchestrator-page.js"></script>

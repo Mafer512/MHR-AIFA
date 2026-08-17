@@ -38,14 +38,18 @@ window.MHRFaunaDashboardPage = (function () {
                             }
                         }
 
-                        // La forma oficial AFAC no lleva bloque de firmas: se oculta
+                        // Las formas oficiales AFAC no llevan bloque de firmas: se oculta
                         // y el botón de envío adopta el nombre del trámite.
-                        const isAfacTab = targetTab === 'afac';
+                        const esFormaAfac = targetTab === 'afac' || targetTab === 'avistamiento';
                         const firmasWrap = document.getElementById('fauna-firmas-wrap');
-                        if (firmasWrap) firmasWrap.style.display = isAfacTab ? 'none' : '';
+                        if (firmasWrap) firmasWrap.style.display = esFormaAfac ? 'none' : '';
                         const faunaSubmitBtn = document.querySelector('#fauna-form input[type="submit"]');
                         if (faunaSubmitBtn) {
-                            faunaSubmitBtn.value = isAfacTab ? 'Generar notificación AFAC' : 'Generar reporte';
+                            const etiquetas = {
+                                afac: 'Generar notificación AFAC',
+                                avistamiento: 'Generar notificación de avistamiento'
+                            };
+                            faunaSubmitBtn.value = etiquetas[targetTab] || 'Generar reporte';
                         }
                     });
                 });
