@@ -267,6 +267,11 @@
         </button>
       </li>
       <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-permisos" id="au-perm-tab" type="button" onclick="auPermLoad()">
+          <i class="fa fa-user-shield me-2"></i>Permisos de vistas
+        </button>
+      </li>
+      <li class="nav-item">
         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-org" id="au-org-tab" type="button">
           <i class="fa fa-sitemap me-2"></i>Organigrama
         </button>
@@ -468,6 +473,51 @@
       <!-- ═══════════════════════
            TAB 2 — ORGANIGRAMA
       ═══════════════════════ -->
+      <!-- ═══════════════════════
+           TAB — PERMISOS DE VISTAS
+      ═══════════════════════ -->
+      <div class="tab-pane fade" id="tab-permisos">
+
+        <div class="au-page-hdr d-flex align-items-center flex-wrap gap-3">
+          <div>
+            <h5 class="fw-bold mb-0" style="color:var(--au-text);font-size:16px">
+              <i class="fa fa-user-shield me-2 text-primary"></i>Permisos de vistas
+            </h5>
+            <span id="au-perm-status" class="small text-muted">&ndash;</span>
+          </div>
+          <div class="ms-auto d-flex gap-2 align-items-center flex-wrap">
+            <input id="au-perm-search" class="form-control form-control-sm" style="width:220px"
+                   placeholder="Buscar usuario&hellip;" oninput="auPermRender()">
+            <button class="btn btn-sm btn-outline-secondary" onclick="auPermLoad()">
+              <i class="fa fa-rotate me-1"></i>Recargar
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="auPermSaveAll()">
+              <i class="fa fa-save me-1"></i>Guardar cambios
+            </button>
+          </div>
+        </div>
+
+        <div class="alert alert-info d-flex gap-2 align-items-start" style="font-size:13px">
+          <i class="fa fa-circle-info mt-1"></i>
+          <div>
+            Define qu&eacute; puede ver cada usuario y d&oacute;nde puede capturar.
+            <b>Sin acceso</b> oculta la vista del men&uacute; lateral;
+            <b>Ver</b> permite consultar sin capturar;
+            <b>Ver y editar</b> habilita la captura de reportes.
+            Los roles <b>admin</b>, <b>superuser</b> y <b>superadmin</b> siempre tienen acceso completo.
+          </div>
+        </div>
+
+        <div class="table-responsive" style="background:var(--au-surface);border-radius:12px">
+          <table class="table table-hover align-middle mb-0" style="font-size:13px">
+            <thead id="au-perm-head"></thead>
+            <tbody id="au-perm-body">
+              <tr><td class="text-muted p-4">Abre la pesta&ntilde;a para cargar&hellip;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="tab-pane fade" id="tab-org">
 
         <!-- Header -->
@@ -897,6 +947,7 @@
 ═══════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<script src="./js/services/permissions-service.js"></script>
 <script>
 (function () {
   'use strict';
@@ -2218,6 +2269,178 @@
   }
 
   function _el(id) { return document.getElementById(id); }
+
+  // ════════════════════════════════════════════════
+  // PERMISOS DE VISTAS
+  // ════════════════════════════════════════════════
+  // Estado propio: esta pestaña consulta por su cuenta para no depender del
+  // orden en que se haya abierto la pestaña de Usuarios.
+  var _auPermUsers = [];
+
+  window.auPermLoad = async function () {
+    var api = window.MHRPermissions;
+    var st  = _el('au-perm-status');
+    if (!api) {
+      if (st) { st.textContent = 'Falta permissions-service.js'; st.className = 'small text-danger'; }
+      return;
+    }
+    if (st) { st.textContent = 'Cargando…'; st.className = 'small text-warning'; }
+
+    try {
+      var res = await Promise.all([
+        _sb.from('v_usuarios_roles').select('*'),
+        _sb.from('user_roles').select('user_id, role, permissions'),
+        _sb.from('profiles').select('id, full_name, username, cargo'),
+        _sb.from('aplicaciones').select('id').eq('clave', 'MHR').maybeSingle()
+      ]);
+      var vu = res[0], ur = res[1], pf = res[2], app = res[3];
+      if (vu.error) throw vu.error;
+
+      var usuarios = vu.data || [];
+
+      // Sólo los usuarios asignados a MHR (si la migración ya está aplicada).
+      if (!app.error && app.data) {
+        var mem = await _sb.from('usuarios_aplicaciones')
+          .select('usuario_id').eq('aplicacion_id', app.data.id).eq('estado', 'ACTIVO');
+        if (!mem.error) {
+          var permitidos = {};
+          (mem.data || []).forEach(function (m) { permitidos[m.usuario_id] = true; });
+          usuarios = usuarios.filter(function (u) {
+            var r = String(u.role || u.rol || '').toLowerCase();
+            return !!permitidos[u.user_id] || r === 'superuser' || r === 'superadmin';
+          });
+        }
+      }
+
+      var roles = {};
+      if (!ur.error) (ur.data || []).forEach(function (r) { roles[r.user_id] = r; });
+      var perfiles = {};
+      if (!pf.error) (pf.data || []).forEach(function (r) { perfiles[r.id] = r; });
+
+      _auPermUsers = usuarios.map(function (u) {
+        var fila = roles[u.user_id] || {};
+        var prof = perfiles[u.user_id] || {};
+        var rol  = u.role || fila.role || '';
+        var norm = api.normalizar(fila.permissions, rol);
+        return {
+          user_id: u.user_id,
+          nombre: prof.full_name || u.full_name || prof.username || u.username || u.email || '(sin nombre)',
+          correo: u.email || '',
+          rol: rol,
+          permissions: fila.permissions,
+          ver: norm.ver.slice(),
+          editar: norm.editar.slice(),
+          total: norm.total,
+          sucio: false
+        };
+      }).sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); });
+
+      auPermRender();
+      if (st) { st.textContent = _auPermUsers.length + ' usuarios'; st.className = 'small text-success'; }
+    } catch (e) {
+      console.error(e);
+      if (st) { st.textContent = 'Error: ' + e.message; st.className = 'small text-danger'; }
+      if (window.showToast) showToast('Error cargando permisos: ' + e.message, 'danger');
+    }
+  };
+
+  window.auPermRender = function () {
+    var api = window.MHRPermissions;
+    var head = _el('au-perm-head');
+    var body = _el('au-perm-body');
+    if (!api || !head || !body) return;
+    var vistas = api.VISTAS;
+
+    head.innerHTML = '<tr><th style="min-width:210px">Usuario</th>' +
+      vistas.map(function (v) {
+        return '<th class="text-center" style="min-width:148px">' +
+          '<div style="font-size:9px;color:var(--au-muted);text-transform:uppercase;letter-spacing:.4px">' +
+          v.grupo + '</div>' + v.label + '</th>';
+      }).join('') + '</tr>';
+
+    var q = String((_el('au-perm-search') || {}).value || '').toLowerCase().trim();
+    var lista = _auPermUsers.filter(function (u) {
+      return !q || (u.nombre + ' ' + u.correo + ' ' + u.rol).toLowerCase().indexOf(q) !== -1;
+    });
+
+    if (!lista.length) {
+      body.innerHTML = '<tr><td colspan="' + (vistas.length + 1) +
+        '" class="text-muted p-4">Sin usuarios que coincidan.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = lista.map(function (u) {
+      var idx = _auPermUsers.indexOf(u);
+      var celdas = vistas.map(function (v) {
+        if (u.total) {
+          return '<td class="text-center"><span class="badge bg-danger-subtle text-danger">Total</span></td>';
+        }
+        var nivel = u.ver.indexOf(v.key) === -1
+          ? 'ninguno'
+          : (u.editar.indexOf(v.key) !== -1 ? 'editar' : 'ver');
+        var opts = [['ninguno', 'Sin acceso'], ['ver', 'Ver']];
+        if (v.editable) opts.push(['editar', 'Ver y editar']);
+        return '<td class="text-center"><select class="form-select form-select-sm" style="font-size:12px" ' +
+          'onchange="auPermSet(' + idx + ',&quot;' + v.key + '&quot;,this.value)">' +
+          opts.map(function (o) {
+            return '<option value="' + o[0] + '"' + (o[0] === nivel ? ' selected' : '') + '>' + o[1] + '</option>';
+          }).join('') + '</select></td>';
+      }).join('');
+
+      return '<tr' + (u.sucio ? ' style="background:rgba(13,110,253,.07)"' : '') + '>' +
+        '<td><div class="fw-semibold">' + u.nombre +
+        (u.sucio ? ' <i class="fa fa-pen text-primary ms-1" style="font-size:10px"></i>' : '') + '</div>' +
+        '<div class="text-muted" style="font-size:11px">' + (u.rol || '—') + '</div></td>' +
+        celdas + '</tr>';
+    }).join('');
+  };
+
+  window.auPermSet = function (idx, key, nivel) {
+    var u = _auPermUsers[idx];
+    if (!u || u.total) return;
+    u.ver    = u.ver.filter(function (k) { return k !== key; });
+    u.editar = u.editar.filter(function (k) { return k !== key; });
+    if (nivel === 'ver' || nivel === 'editar') u.ver.push(key);
+    if (nivel === 'editar') u.editar.push(key);
+    u.sucio = true;
+    auPermRender();
+  };
+
+  window.auPermSaveAll = async function () {
+    var api = window.MHRPermissions;
+    var pend = _auPermUsers.filter(function (u) { return u.sucio && !u.total; });
+    if (!pend.length) {
+      if (window.showToast) showToast('No hay cambios por guardar', 'info');
+      return;
+    }
+    var st = _el('au-perm-status');
+    if (st) { st.textContent = 'Guardando…'; st.className = 'small text-warning'; }
+
+    var ok = 0, fallidos = [];
+    for (var i = 0; i < pend.length; i++) {
+      var u = pend[i];
+      try {
+        var perms = api.construir(u.permissions, u.ver, u.editar);
+        var upd = await _sb.from('user_roles').update({ permissions: perms }).eq('user_id', u.user_id);
+        if (upd.error) throw upd.error;
+        u.permissions = perms;
+        u.sucio = false;
+        ok++;
+      } catch (e) {
+        fallidos.push(u.nombre + ' (' + e.message + ')');
+      }
+    }
+
+    auPermRender();
+    if (fallidos.length) {
+      if (window.showToast) showToast('Guardados ' + ok + '. Fallaron: ' + fallidos.join(' | '), 'danger');
+      if (st) { st.textContent = fallidos.length + ' con error'; st.className = 'small text-danger'; }
+    } else {
+      if (window.showToast) showToast('Permisos actualizados (' + ok + ' usuarios)', 'success');
+      if (st) { st.textContent = _auPermUsers.length + ' usuarios'; st.className = 'small text-success'; }
+    }
+  };
+
 
   function _setText(id, val) {
     var el = _el(id);

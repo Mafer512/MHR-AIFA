@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mhr-cache-v26';
+const CACHE_NAME = 'mhr-cache-v27';
 
 // Archivos del shell de la app que se cachean al instalar
 const SHELL_FILES = [

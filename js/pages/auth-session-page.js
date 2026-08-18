@@ -168,6 +168,8 @@ window.MHRAuthSessionPage = (function () {
                         }
                     }
                 
+                    if (window.MHRViewPermissions) window.MHRViewPermissions.aplicar();
+
                     var adminPanel = document.getElementById('admin-panel');
                     if (adminPanel && ['admin', 'superuser', 'superadmin', 'ingenieria'].includes(role)) {
                         adminPanel.style.display = 'block';
@@ -262,6 +264,10 @@ window.MHRAuthSessionPage = (function () {
                         // Sellar responsable y cargo en todos los formularios
                         // con la identidad de la sesión (ver identity-lock.js).
                         if (window.MHRIdentity) window.MHRIdentity.aplicar(true);
+
+                        // Ocultar del menú las vistas sin permiso y dejar en
+                        // sólo lectura las que no permiten capturar.
+                        if (window.MHRViewPermissions) window.MHRViewPermissions.aplicar();
 
                         // Auto-fill cargo and lock
                         if (currentCargo && roleSelect) {
