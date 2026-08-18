@@ -99,17 +99,25 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (e) { console.error('Error clearing form fields', e); }
 
+        // El responsable y el cargo se vuelven a tomar de la sesión: limpiar
+        // el formulario no debe permitir reportar a nombre de otra persona.
+        try { if (window.MHRIdentity) window.MHRIdentity.fijar(); } catch (e) { }
+
         if (isRevisionActive) {
             try {
                 var authorSel = document.getElementById('report-authors-select');
                 var authorReset = document.getElementById('report-authors-reset');
-                if (authorSel) { authorSel.value = ''; authorSel.disabled = false; }
+                if (authorSel && !window.MHRIdentity?.estaFijado(authorSel)) {
+                    authorSel.value = ''; authorSel.disabled = false;
+                }
                 if (authorReset) authorReset.style.display = 'none';
 
                 var roleSel = document.getElementById('report-role');
                 var roleReset = document.getElementById('report-role-reset');
                 var roleOther = document.getElementById('report-role-other');
-                if (roleSel) { roleSel.selectedIndex = 0; roleSel.disabled = false; }
+                if (roleSel && !window.MHRIdentity?.estaFijado(roleSel)) {
+                    roleSel.selectedIndex = 0; roleSel.disabled = false;
+                }
                 if (roleReset) roleReset.style.display = 'none';
                 if (roleOther) { roleOther.value = ''; roleOther.style.display = 'none'; }
 
@@ -124,7 +132,9 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 var faunaAuthorSel = document.getElementById('fauna_report-authors-select');
                 var faunaAuthorReset = document.getElementById('fauna_report-authors-reset');
-                if (faunaAuthorSel) { faunaAuthorSel.value = ''; faunaAuthorSel.disabled = false; }
+                if (faunaAuthorSel && !window.MHRIdentity?.estaFijado(faunaAuthorSel)) {
+                    faunaAuthorSel.value = ''; faunaAuthorSel.disabled = false;
+                }
                 if (faunaAuthorReset) faunaAuthorReset.style.display = 'none';
 
                 var faunaPistaBtn = document.getElementById('fauna_pista-change-btn');

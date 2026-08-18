@@ -6,6 +6,11 @@
         function bindLockSelect(selectEl, resetBtn, opts) {
             if (!selectEl || !resetBtn) return;
             if (selectEl.dataset.mhrLockBound === '1') return;
+            // El responsable y el cargo se toman de la sesión: no se desbloquean.
+            if (selectEl.dataset.mhrIdentidad === '1') {
+                resetBtn.style.display = 'none';
+                return;
+            }
             var options = opts || {};
             var clearOnReset = !!options.clearOnReset;
 
@@ -16,6 +21,7 @@
             });
 
             resetBtn.addEventListener('click', function () {
+                if (selectEl.dataset.mhrIdentidad === '1') { resetBtn.style.display = 'none'; return; }
                 selectEl.disabled = false;
                 if (clearOnReset) selectEl.value = '';
                 resetBtn.style.display = 'none';

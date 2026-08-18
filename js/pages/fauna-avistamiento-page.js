@@ -231,6 +231,9 @@
         var thumb = document.getElementById('avi-map-thumb');
         if (thumb) { thumb.style.display = 'none'; thumb.removeAttribute('src'); }
 
+        // Volver a tomar de la sesión quién reporta y su puesto
+        if (window.MHRIdentity) window.MHRIdentity.fijar();
+
         syncCheckStyles();
         toggleDescripciones();
         showStatus('');

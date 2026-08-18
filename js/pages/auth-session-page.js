@@ -259,6 +259,10 @@ window.MHRAuthSessionPage = (function () {
                             if (resetBtn) resetBtn.style.display = 'none';
                         }
 
+                        // Sellar responsable y cargo en todos los formularios
+                        // con la identidad de la sesión (ver identity-lock.js).
+                        if (window.MHRIdentity) window.MHRIdentity.aplicar(true);
+
                         // Auto-fill cargo and lock
                         if (currentCargo && roleSelect) {
                             // Try to match existing option
