@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mhr-cache-v23';
+const CACHE_NAME = 'mhr-cache-v24';
 
 // Archivos del shell de la app que se cachean al instalar
 const SHELL_FILES = [
@@ -18,7 +18,7 @@ const SHELL_FILES = [
     './icons/icon-192-maskable.png',
     './icons/icon-512-maskable.png',
     // CDN – se pre-cachean para que estén disponibles sin internet
-    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap',
+    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@400;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
     'https://cdn.jsdelivr.net/npm/@mapbox/togeojson@0.16.2/togeojson.js',

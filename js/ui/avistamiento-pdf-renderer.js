@@ -34,7 +34,7 @@
 
         var atrayentes = d.atrayentes || [];
 
-        var h = '<div style="font-family:Arial,Helvetica,sans-serif;color:#000;">';
+        var h = '<div style="font-family:' + k.FONT + ';color:#000;font-size:' + k.FS.base + 'px;">';
 
         h += k.header(logos, [
             'AGENCIA FEDERAL DE AVIACIÓN CIVIL',
@@ -49,47 +49,50 @@
             { html: lbl('1. Fecha del Evento (dd/mm/aaaa):') + ' ' + fld(k.fechaDDMMAAAA(d.fecha_evento)), width: '50%' },
             { html: lbl('2. Hora Local del Evento:') + ' ' + fld(d.hora_evento, '52px'), width: '35%' },
             {
-                html: '<div style="line-height:1.6;">' +
-                    '<div style="font-size:8.5px;">' + box(d.meridiano === 'AM') + 'AM</div>' +
-                    '<div style="font-size:8.5px;">' + box(d.meridiano === 'PM') + 'PM</div></div>',
-                width: '15%'
+                html: '<div>' +
+                    '<div style="font-size:8px;line-height:11px;">' + box(d.meridiano === 'AM') + 'AM</div>' +
+                    '<div style="font-size:8px;line-height:11px;">' + box(d.meridiano === 'PM') + 'PM</div></div>',
+                width: '15%',
+                style: 'padding:1px 6px;line-height:normal;'
             }
-        ]));
+        ]), false, 24.9);
 
         // 3 · Luz solar
         h += row(k.optionsRow('3. Luz solar:', '15%',
-            ['Amanecer', 'Día', 'Anochecer', 'Noche'], d.luz_solar, 4));
+            ['Amanecer', 'Día', 'Anochecer', 'Noche'], d.luz_solar, 4), false, 21.3);
 
         // 4-5 (izquierda apilados) · 6 · 7
         h += row(cols([
             {
                 html: '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">' +
-                    '<tr><td style="padding:4px 6px;font-size:8.5px;border-bottom:' + B + ';">' +
+                    '<tr><td style="padding:2px 6px;font-size:8px;line-height:18px;border-bottom:' + B + ';">' +
                     lbl('4. Aeródromo:') + ' ' + fld(d.aerodromo, '58px') + '</td></tr>' +
-                    '<tr><td style="padding:4px 6px;font-size:8.5px;">' +
+                    '<tr><td style="padding:2px 6px;font-size:8px;line-height:18px;">' +
                     lbl('5. Altura (AGL):') + ' ' + fld(d.altura_agl, '58px') + '</td></tr></table>',
                 width: '28%',
+                divider: true,
                 style: 'padding:0;'
             },
             {
                 html: '<table style="width:100%;border-collapse:collapse;table-layout:fixed;"><tr>' +
                     '<td style="width:40%;vertical-align:middle;padding-right:5px;">' +
                     lbl('6. Ubicación en Aeródromo:') + '</td>' +
-                    '<td style="vertical-align:middle;">' + area(d.ubicacion_aerodromo, 40) + '</td>' +
+                    '<td style="vertical-align:middle;">' + area(d.ubicacion_aerodromo, 30) + '</td>' +
                     '</tr></table>',
                 width: '40%',
+                divider: true,
                 style: 'vertical-align:middle;'
             },
             {
                 html: '<table style="width:100%;border-collapse:collapse;table-layout:fixed;"><tr>' +
                     '<td style="width:38%;vertical-align:middle;padding-right:5px;">' +
                     lbl('7. Ubicación en Ruta:') + '</td>' +
-                    '<td style="vertical-align:middle;">' + area(d.ubicacion_ruta, 40) + '</td>' +
+                    '<td style="vertical-align:middle;">' + area(d.ubicacion_ruta, 30) + '</td>' +
                     '</tr></table>',
                 width: '32%',
                 style: 'vertical-align:middle;'
             }
-        ]));
+        ]), false, 48.1);
 
         // 8 · Restos de fauna muerta
         h += row(cols([
@@ -99,18 +102,18 @@
                     optCol('Si', d.restos_fauna === true, '46%') +
                     optCol('No', d.restos_fauna === false, '46%') + '</div>',
                 width: '46%',
-                style: 'vertical-align:middle;'
+                style: 'vertical-align:middle;line-height:normal;'
             },
             {
                 html: '<table style="width:100%;border-collapse:collapse;"><tr>' +
-                    '<td style="width:34%;text-align:center;font-size:8.5px;vertical-align:middle;">' +
+                    '<td style="width:34%;text-align:center;font-size:8px;vertical-align:middle;">' +
                     'Descripción de los restos:</td>' +
-                    '<td style="vertical-align:top;">' + area(d.restos_descripcion, 38) + '</td>' +
+                    '<td style="vertical-align:top;">' + area(d.restos_descripcion, 28) + '</td>' +
                     '</tr></table>',
                 width: '54%',
                 style: 'padding:4px 6px;'
             }
-        ]));
+        ]), false, 46.2);
 
         // 9 · Efectos en la operación
         h += row(cols([
@@ -120,41 +123,42 @@
                     optCol('Si', d.efectos_operacion === true, '46%') +
                     optCol('No', d.efectos_operacion === false, '46%') + '</div>',
                 width: '46%',
-                style: 'vertical-align:middle;'
+                style: 'vertical-align:middle;line-height:normal;'
             },
             {
                 html: '<table style="width:100%;border-collapse:collapse;"><tr>' +
-                    '<td style="width:34%;text-align:center;font-size:8.5px;vertical-align:middle;">' +
+                    '<td style="width:34%;text-align:center;font-size:8px;vertical-align:middle;">' +
                     'Descripción de los efectos:</td>' +
-                    '<td style="vertical-align:top;">' + area(d.efectos_descripcion, 38) + '</td>' +
+                    '<td style="vertical-align:top;">' + area(d.efectos_descripcion, 28) + '</td>' +
                     '</tr></table>',
                 width: '54%',
                 style: 'padding:4px 6px;'
             }
-        ]));
+        ]), false, 46.2);
 
         // 10-13 · Meteorología
         h += row(k.optionsRow('10. Condición del Cielo:', '24%',
-            ['Despejado', 'Medio Nublado', 'Nublado'], d.condicion_cielo, 3));
+            ['Despejado', 'Medio Nublado', 'Nublado'], d.condicion_cielo, 3), false, 20.0);
         h += row(k.optionsRow('11. Precipitación:', '18%',
-            ['Niebla', 'Lluvia', 'Nieve', 'Ninguna'], d.precipitacion, 4));
-        h += row(k.optionsRow('12. Temperatura Ambiente Estimada:', '34%',
-            ['Menor a 10°C', 'De 10°C a 20°C', 'Mayor a 20°C'], d.temperatura, 3));
-        h += row(k.optionsRow('13. Viento Estimado:', '22%',
+            ['Niebla', 'Lluvia', 'Nieve', 'Ninguna'], d.precipitacion, 4), false, 19.9);
+        h += row(k.optionsRow('12. Temperatura Ambiente Estimada:', '30%',
+            ['Menor a 10°C', 'De 10°C a 20°C', 'Mayor a 20°C'], d.temperatura, 3), false, 19.9);
+        h += row(k.optionsRow('13. Viento Estimado:', '17%',
             ['Calma (0 kts)', 'Ligero (menor a 3 kts)', 'Moderado (3 a 10 kts)', 'Fuerte (mayor a 10 kts)'],
-            d.viento, 4));
+            d.viento, 4), false, 20.0);
 
         // 14-15
         h += row(cols([
-            { html: lbl('14. Especie de Fauna:') + ' ' + fld(d.especie_fauna, '56%'), width: '42%' },
+            { html: lbl('14. Especie de Fauna:') + ' ' + fld(d.especie_fauna, '97px'), width: '36%', style: 'white-space:nowrap;' },
             {
                 html: lbl('15. Tamaño del (los) Ejemplar(es):') + ' ' +
                     ['Pequeño(s)', 'Mediano(s)', 'Grande(s)'].map(function (v) {
                         return k.opt(v, d.tamano_ejemplares === v);
                     }).join(''),
-                width: '58%'
+                width: '64%',
+                style: 'white-space:nowrap;'
             }
-        ]));
+        ]), false, 25.2);
 
         // 16 · Características de la fauna avistada
         h += row(cols([
@@ -164,15 +168,15 @@
                 width: '32%',
                 style: 'vertical-align:middle;'
             },
-            { html: area(d.caracteristicas, 40), width: '68%', style: 'vertical-align:top;' }
-        ]));
+            { html: area(d.caracteristicas, 30), width: '68%', style: 'vertical-align:top;' }
+        ]), false, 46.2);
 
         // 17-18
-        var ejemplares = '<div style="padding:4px 6px;">' + lbl('17. Número de Ejemplares Avistados') +
+        var ejemplares = '<div style="padding:2px 6px;">' + lbl('17. Número de Ejemplares Avistados') +
             '<table style="width:100%;border-collapse:collapse;margin-top:6px;table-layout:fixed;">';
         RANGOS.forEach(function (r) {
             ejemplares += '<tr>' +
-                '<td style="font-size:8.5px;padding:4px 0 4px 26px;">' + esc(r) + '</td>' +
+                '<td style="font-size:8px;padding:4px 0 4px 26px;">' + esc(r) + '</td>' +
                 '<td style="text-align:center;padding:4px;width:60px;">' + box(d.ejemplares_avistados === r) + '</td>' +
                 '</tr>';
         });
@@ -182,8 +186,8 @@
             '<td style="width:38%;vertical-align:top;border-right:' + B + ';padding:0;">' + ejemplares + '</td>' +
             '<td style="width:20%;padding:4px 6px;text-align:center;vertical-align:middle;">' +
             lbl('18. Descripción del Comportamiento de la Fauna Avistada:') + '</td>' +
-            '<td style="width:42%;padding:4px 6px;vertical-align:top;">' + area(d.comportamiento, 92) + '</td>' +
-            '</tr></table>');
+            '<td style="width:42%;padding:4px 6px;vertical-align:top;">' + area(d.comportamiento, 68) + '</td>' +
+            '</tr></table>', false, 93.7);
 
         // 19 · Probables atrayentes
         var atrayentesHtml = '<table style="width:100%;border-collapse:collapse;table-layout:fixed;"><tr>' +
@@ -191,31 +195,31 @@
             lbl('19. Probables Atrayentes de Fauna en la Cercanía:') + '</td>' +
             '<td style="width:70%;padding:4px 6px;vertical-align:middle;">';
         ATRAYENTES.forEach(function (a, i) {
-            atrayentesHtml += optCol(a[1], atrayentes.indexOf(a[0]) !== -1, '32%');
+            atrayentesHtml += optCol(a[1], atrayentes.indexOf(a[0]) !== -1, '33%');
             if (i === 2) atrayentesHtml += '<div style="height:5px;"></div>';
         });
         atrayentesHtml += '</td></tr></table>' +
             '<table style="width:100%;border-collapse:collapse;table-layout:fixed;"><tr>' +
-            '<td style="width:22%;padding:4px 6px;text-align:right;font-size:8.5px;vertical-align:middle;">' +
+            '<td style="width:22%;padding:4px 6px;text-align:right;font-size:8px;vertical-align:middle;">' +
             'Descripción de los probables atrayentes:</td>' +
-            '<td style="padding:4px 6px;vertical-align:top;">' + area(d.atrayentes_descripcion, 34) + '</td>' +
+            '<td style="padding:4px 6px;vertical-align:top;">' + area(d.atrayentes_descripcion, 28) + '</td>' +
             '</tr></table>';
-        h += row(atrayentesHtml);
+        h += row(atrayentesHtml, false, 90.0);
 
         // 20-21
         h += row(cols([
             { html: lbl('20. Reportado por:') + ' ' + fld(d.reportado_por, '62%'), width: '58%' },
             { html: lbl('21. Puesto:') + ' ' + fld(d.puesto, '58%'), width: '42%' }
-        ]));
+        ]), false, 24.9);
 
         // 22-23
         h += row(cols([
             { html: lbl('22. Empresa:') + ' ' + fld(d.empresa, '66%'), width: '55%' },
             { html: lbl('23. Fecha del Reporte (dd/mm/aaaa):') + ' ' + fld(k.fechaDDMMAAAA(d.fecha_reporte), '72px'), width: '45%' }
-        ]));
+        ]), false, 23.6);
 
         // Nota al pie — el formato de avistamiento no pide copia de acuse
-        h += row(k.notaPie(false), true);
+        h += row(k.notaPie(false), true, 129.9);
 
         h += '</tbody></table>';
         h += k.pieControl(folio);

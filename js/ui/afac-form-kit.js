@@ -11,8 +11,11 @@
 (function () {
     'use strict';
 
-    // Grosor de línea de la rejilla oficial
-    var B = '1.2px solid #000';
+    // Medidas tomadas del formato oficial (el render usa 1 px = 1 pt):
+    // rejilla de 575 pt de ancho, Montserrat 8 pt y trazo de 0.6 pt.
+    var B = '0.6px solid #000';
+    var FONT = "'Montserrat', Arial, Helvetica, sans-serif";
+    var FS = { base: 8, small: 7, title: 10 };
 
     var LOGOS = { sict: null, afac: null, loaded: false };
 
@@ -65,55 +68,74 @@
     function box(on) {
         return '<span style="display:inline-block;width:10px;height:10px;border:' + B +
             ';margin-right:5px;text-align:center;line-height:9px;font-size:9px;' +
-            'font-weight:700;font-family:Arial,Helvetica,sans-serif;vertical-align:-1px;">' +
+            'font-weight:700;font-family:' + FONT + ';vertical-align:-1px;">' +
             (on ? '&#10005;' : '&nbsp;') + '</span>';
     }
 
     // Opción suelta "☐ Etiqueta"
     function opt(label, on) {
-        return '<span style="display:inline-block;font-size:8.5px;white-space:nowrap;' +
-            'margin-right:14px;">' + box(on) + esc(label) + '</span>';
+        return '<span style="display:inline-block;font-size:8px;white-space:nowrap;' +
+            'margin-right:9px;">' + box(on) + esc(label) + '</span>';
     }
 
     // Opción en columnas de ancho fijo (para repartir N por renglón)
     function optCol(label, on, width) {
-        return '<span style="display:inline-block;width:' + width + ';font-size:8.5px;">' +
-            box(on) + esc(label) + '</span>';
+        return '<span style="display:inline-block;width:' + width + ';font-size:8px;' +
+            'white-space:nowrap;">' + box(on) + esc(label) + '</span>';
     }
 
-    // Campo de captura con recuadro
+    // Campo de captura con recuadro.
+    // Los recuadros conservan el ancho del formato oficial; cuando el dato es
+    // más largo de lo que cabe (nombres científicos, por ejemplo) se reduce la
+    // letra en lugar de recortar el texto, para no perder información.
     function fld(value, width) {
+        var v = (value === null || value === undefined) ? '' : String(value);
+        var fs = FS.base;
+        var m = /^([\d.]+)px$/.exec(width || '');
+        if (m && v) {
+            var util = parseFloat(m[1]) - 12;
+            var estimado = v.length * FS.base * 0.5;
+            if (estimado > util) fs = Math.max(5, FS.base * util / estimado);
+        }
         return '<span style="display:inline-block;border:' + B + ';padding:2px 5px;' +
-            'font-size:8.5px;min-height:11px;line-height:11px;' +
+            'font-size:' + (Math.round(fs * 100) / 100) + 'px;min-height:11px;line-height:11px;' +
             (width ? 'width:' + width + ';' : 'min-width:70px;') +
             'vertical-align:middle;overflow:hidden;white-space:nowrap;">' +
-            (esc(value) || '&nbsp;') + '</span>';
+            (esc(v) || '&nbsp;') + '</span>';
     }
 
     // Caja multilínea (observaciones, descripciones, ubicaciones)
     function area(value, minHeight) {
-        return '<div style="border:' + B + ';min-height:' + (minHeight || 34) + 'px;padding:3px 5px;' +
-            'font-size:8.5px;white-space:pre-wrap;word-break:break-word;line-height:1.35;">' +
+        return '<div style="border:' + B + ';min-height:' + (minHeight || 34) + 'px;padding:2px 5px;' +
+            'font-size:8px;white-space:pre-wrap;word-break:break-word;line-height:1.35;">' +
             (esc(value) || '&nbsp;') + '</div>';
     }
 
     function lbl(text) {
-        return '<span style="font-size:8.5px;font-weight:700;">' + text + '</span>';
+        return '<span style="font-size:8px;font-weight:700;">' + text + '</span>';
     }
 
-    // Renglón de la rejilla exterior
-    function row(innerHtml, last) {
-        return '<tr><td style="padding:0;' +
+    // Renglón de la rejilla exterior.
+    // `h` es la altura de la banda medida en el formato oficial (en pt, que
+    // aquí equivale a px): fijarla reproduce la retícula del original.
+    function row(innerHtml, last, h) {
+        return '<tr' + (h ? ' style="height:' + h + 'px;"' : '') + '>' +
+            '<td style="padding:0;box-sizing:border-box;' + (h ? 'height:' + h + 'px;' : '') +
             (last ? '' : 'border-bottom:' + B + ';') + '">' + innerHtml + '</td></tr>';
     }
 
-    // Tabla interna de columnas para un renglón
+    // Tabla interna de columnas para un renglón.
+    // El formato oficial NO separa las casillas con líneas verticales: sólo
+    // dibuja una divisoria en los bloques que agrupan varias casillas (la 12
+    // del formato de impacto y la 18 del de avistamiento). Por eso la
+    // divisoria es opcional y se pide con `divider: true` en la celda.
     function cols(cells) {
         var html = '<table style="width:100%;border-collapse:collapse;table-layout:fixed;"><tr>';
-        cells.forEach(function (c, i) {
-            html += '<td style="padding:4px 6px;vertical-align:middle;font-size:8.5px;' +
+        cells.forEach(function (c) {
+            html += '<td style="padding:2px 6px;vertical-align:middle;font-size:' + FS.base + 'px;' +
+                'line-height:18px;' +
                 (c.width ? 'width:' + c.width + ';' : '') +
-                (i < cells.length - 1 ? 'border-right:' + B + ';' : '') +
+                (c.divider ? 'border-right:' + B + ';' : '') +
                 (c.style || '') + '">' + c.html + '</td>';
         });
         return html + '</tr></table>';
@@ -123,11 +145,12 @@
     function optionsRow(label, labelWidth, values, selected, perRow) {
         var width = Math.floor(100 / (perRow || values.length)) - 1 + '%';
         return cols([
-            { html: lbl(label), width: labelWidth },
+            { html: lbl(label), width: labelWidth, style: 'line-height:normal;' },
             {
                 html: values.map(function (v) {
                     return optCol(v, selected === v, width);
-                }).join('')
+                }).join(''),
+                style: 'line-height:normal;'
             }
         ]);
     }
@@ -137,27 +160,27 @@
     // Proporciones tomadas del original: SICT ~30 % del ancho útil,
     // escudo AFAC ~18 %, y los títulos centrados entre ambos.
     function header(logos, titleLines, formaCode) {
-        var h = '<table style="width:100%;border-collapse:collapse;margin-bottom:2px;table-layout:fixed;"><tr>' +
+        var h = '<table style="width:100%;border-collapse:collapse;margin-bottom:1px;table-layout:fixed;"><tr>' +
             '<td style="width:30%;vertical-align:middle;">' +
             (logos.sict ? '<img src="' + logos.sict + '" style="width:100%;display:block;">' : '') +
             '</td>' +
             '<td style="width:52%;text-align:center;vertical-align:middle;line-height:1.35;">';
         titleLines.forEach(function (t) {
-            h += '<div style="font-size:11px;font-weight:700;">' + t + '</div>';
+            h += '<div style="font-size:' + FS.title + 'px;font-weight:700;">' + t + '</div>';
         });
         h += '</td>' +
-            '<td style="width:18%;text-align:right;vertical-align:middle;">' +
+            '<td style="width:15.5%;text-align:right;vertical-align:middle;">' +
             (logos.afac ? '<img src="' + logos.afac + '" style="width:100%;display:block;margin-left:auto;">' : '') +
             '</td></tr></table>';
 
-        h += '<div style="text-align:right;font-size:8px;font-weight:700;margin-bottom:3px;">' +
+        h += '<div style="text-align:right;font-size:' + FS.small + 'px;font-weight:700;line-height:9px;margin-bottom:1px;">' +
             'FORMA: ' + esc(formaCode) + '</div>';
         return h;
     }
 
     // Nota al pie (texto oficial; el de impacto incluye una frase extra)
     function notaPie(conAcuseDeRecibo) {
-        return '<div style="padding:5px 7px;font-size:7.5px;line-height:1.45;text-align:justify;">' +
+        return '<div style="padding:5px 7px;font-size:7px;line-height:1.45;text-align:justify;">' +
             'Este formulario debe ser entregado a la Autoridad Aeronáutica representada por cualquiera de las ' +
             'Comandancias de Aeropuerto de la red aeroportuaria nacional. ' +
             (conAcuseDeRecibo ? 'Debe presentarse con copia para efectos de acuse de recibo. ' : '') +
@@ -282,10 +305,10 @@
 
     /* ── Salida a PDF ──────────────────────────────────────────────────── */
 
-    // Carta a 96 dpi = 816 × 1056 px. Con margen de 9 mm (≈34 px) el área
-    // útil es de 748 × 988 px, que es el ancho con el que se diseñaron las
-    // réplicas y con el que se miden al renderizarlas.
-    var PAGE = { w: 215.9, h: 279.4, margin: 9, pxWidth: 748 };
+    // El original deja 18.5 pt (6.53 mm) de margen, dejando una rejilla de
+    // 575 pt de ancho. Se renderiza a 575 px para que 1 px equivalga a 1 pt y
+    // las medidas del formato se puedan trasladar tal cual.
+    var PAGE = { w: 215.9, h: 279.4, margin: 6.53, pxWidth: 575 };
 
     function getJsPDF() {
         return (window.jspdf && window.jspdf.jsPDF) || window.jsPDF ||
@@ -325,7 +348,7 @@
 
         var holder = document.createElement('div');
         holder.style.cssText = 'position:fixed;top:0;left:-10000px;width:' + PAGE.pxWidth +
-            'px;background:#fff;overflow:visible;';
+            'px;background:#fff;overflow:visible;font-family:' + FONT + ';';
         document.body.appendChild(holder);
 
         var pdf = null;
@@ -333,9 +356,14 @@
             for (var i = 0; i < pagesHtml.length; i++) {
                 holder.innerHTML = pagesHtml[i];
                 await waitForImages(holder);
+                // Sin esperar a Montserrat, html2canvas capturaría con la
+                // tipografía de reserva y cambiarían todas las medidas.
+                if (document.fonts && document.fonts.ready) {
+                    try { await document.fonts.ready; } catch (e) { }
+                }
 
                 var canvas = await window.html2canvas(holder, {
-                    scale: 2,
+                    scale: 3,
                     useCORS: true,
                     allowTaint: true,
                     logging: false,
@@ -370,6 +398,8 @@
 
     window.MHRAfacFormKit = {
         B: B,
+        FONT: FONT,
+        FS: FS,
         esc: esc,
         fechaDDMMAAAA: fechaDDMMAAAA,
         loadLogos: loadLogos,
