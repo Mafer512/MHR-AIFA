@@ -167,16 +167,26 @@
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: none;
             background: transparent;
             cursor: pointer;
-            font-size: 18px;
-            line-height: 1;
+            line-height: 0;
             color: #64748b;
-            padding: 2px;
+            padding: 4px;
+            border-radius: 6px;
+            transition: color .15s, background .15s;
+        }
+
+        .password-toggle:focus-visible {
+            outline: 2px solid #0055a5;
+            outline-offset: 1px;
         }
         .password-toggle:hover {
             color: #0f172a;
+            background: rgba(15, 23, 42, .06);
         }
 
         #login-btn {
