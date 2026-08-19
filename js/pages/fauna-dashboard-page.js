@@ -279,6 +279,12 @@ window.MHRFaunaDashboardPage = (function () {
             }
 
             // ── helpers para estadísticas fauna ──────────────────────────────
+            // Etiquetas de los meses, compartidas por todas las gráficas.
+            // Estaban declaradas dentro de cada función, así que
+            // loadFaunaStatistics fallaba al usarlas y dejaba de ejecutar
+            // lo que venía después (entre ello, las tarjetas de aerolíneas).
+            var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
             function fesCountBy(arr, field) {
                 var idx = {};
                 arr.forEach(function(r){
@@ -402,7 +408,6 @@ window.MHRFaunaDashboardPage = (function () {
             function fesHeatmap(containerId, data) {
                 var el = document.getElementById(containerId);
                 if (!el) return;
-                var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
                 var CONDICIONES = ['Despejado','Nublado','Nublado-Neblina','Lluvia','Tormenta','Niebla'];
 
                 // Build matrix
@@ -989,7 +994,6 @@ window.MHRFaunaDashboardPage = (function () {
 
             // ── Render all impacto charts for a given dataset ────────────────
             function _fesRenderImpCharts(data) {
-                var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
                 // Eventos por mes
                 var cByMonth = new Array(12).fill(0);
                 data.forEach(function(r){
@@ -1252,7 +1256,6 @@ window.MHRFaunaDashboardPage = (function () {
                 if (charts) {
                     charts.style.display = records.length ? '' : 'none';
                     if (records.length) {
-                        var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
                         // Eventos por mes
                         var cByMonth = new Array(12).fill(0);
                         records.forEach(function(r) {
@@ -1863,6 +1866,10 @@ window.MHRFaunaDashboardPage = (function () {
             // Exponer para uso externo (fauna-submit-page, supabase-orchestrator)
             window.loadFaunaReports = loadFaunaReports;
             window.loadFaunaStatistics = loadFaunaStatistics;
+            // Faltaba exponerla: el orquestador, main-tabs y fauna-interactions
+            // la buscan en window, la encontraban indefinida y nunca la
+            // llamaban, así que los catálogos de fauna jamás se cargaban.
+            window.cargarCatalogosFauna = cargarCatalogosFauna;
 
             // ═══════════════════════════════════════════════════════
             // VISTA DE DATOS — tabla completa fauna_reports con
