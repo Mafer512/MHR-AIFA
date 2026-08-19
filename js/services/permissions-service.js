@@ -28,8 +28,8 @@
             icono: 'fa-clipboard-check', desc: 'Capturar la revisión del área de movimiento'
         },
         {
-            grupo: 'Seguridad Operacional', key: 'historial', label: 'Historial SO', editable: false,
-            icono: 'fa-clock-rotate-left', desc: 'Consultar reportes anteriores y sus PDF'
+            grupo: 'Seguridad Operacional', key: 'historial', label: 'Historial SO', editable: true,
+            icono: 'fa-clock-rotate-left', desc: 'Consultar reportes; con captura puede editarlos y eliminarlos'
         },
         {
             grupo: 'Seguridad Operacional', key: 'estadistica', label: 'Estadística SO', editable: false,

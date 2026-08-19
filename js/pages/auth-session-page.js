@@ -170,11 +170,14 @@ window.MHRAuthSessionPage = (function () {
                 
                     if (window.MHRViewPermissions) window.MHRViewPermissions.aplicar();
 
-                    var adminPanel = document.getElementById('admin-panel');
-                    if (adminPanel && ['admin', 'superuser', 'superadmin', 'ingenieria'].includes(role)) {
-                        adminPanel.style.display = 'block';
-                        if (typeof loadAdminReports === 'function') {
-                            loadAdminReports();
+                    // El Historial SO (#admin-panel) ya no depende del rol: lo
+                    // decide el permiso de vista, que aplica MHRViewPermissions.
+                    // Este respaldo cubre el caso de que aún no se haya cargado.
+                    if (!window.MHRViewPermissions) {
+                        var adminPanel = document.getElementById('admin-panel');
+                        if (adminPanel && ['admin', 'superuser', 'superadmin', 'ingenieria'].includes(role)) {
+                            adminPanel.style.display = 'block';
+                            if (typeof loadAdminReports === 'function') loadAdminReports();
                         }
                     }
                 }

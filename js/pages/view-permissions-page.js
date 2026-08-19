@@ -57,14 +57,11 @@
             grupo.style.display = visibles.length ? '' : 'none';
         });
 
-        // Entrada de Administración
+        // Entrada de Administración. Ojo: #admin-panel NO es esta entrada, es
+        // la tabla del Historial SO (nombre heredado); se controla en aplicarHistorial.
         var admin = api.puedeVer(P, 'admin-usuarios');
         var popup = document.getElementById('sidebar-admin-popup');
-        var panel = document.getElementById('admin-panel');
-        if (!admin) {
-            if (popup) popup.style.display = 'none';
-            if (panel) panel.style.display = 'none';
-        }
+        if (!admin && popup) popup.style.display = 'none';
         document.querySelectorAll('[onclick*="mhrOpenAdminPanel"]').forEach(function (el) {
             el.style.display = admin ? '' : 'none';
         });
@@ -102,6 +99,26 @@
         aviso.style.display = 'block';
     }
 
+    /**
+     * El Historial SO vive dentro de #admin-panel, oculto por omisión. Se
+     * muestra a quien tenga permiso de verlo (ya no sólo a los roles admin) y
+     * se marca de sólo lectura cuando no puede editarlo, lo que oculta los
+     * botones de modificar y eliminar mediante CSS.
+     */
+    function aplicarHistorial(P) {
+        var api = window.MHRPermissions;
+        var panel = document.getElementById('admin-panel');
+        var puedeVer = api.puedeVer(P, 'historial');
+        if (panel) panel.style.display = puedeVer ? 'block' : 'none';
+
+        var seccion = document.getElementById('historial-section');
+        if (seccion) seccion.classList.toggle('mhr-sin-edicion', !api.puedeEditar(P, 'historial'));
+
+        if (puedeVer && typeof window.loadAdminReports === 'function') {
+            try { window.loadAdminReports(); } catch (e) { }
+        }
+    }
+
     /** Si la vista abierta ya no está permitida, mueve a la primera válida. */
     function asegurarVistaValida(P) {
         var api = window.MHRPermissions;
@@ -134,8 +151,9 @@
         permisos = await api.cargarDeUsuario(window.supabaseClient, user.id, role);
 
         aplicarMenu(permisos);
+        aplicarHistorial(permisos);
         api.VISTAS.forEach(function (v) {
-            if (v.editable) aplicarSoloLectura(v.key, api.puedeEditar(permisos, v.key));
+            if (FORMULARIOS[v.key]) aplicarSoloLectura(v.key, api.puedeEditar(permisos, v.key));
         });
         asegurarVistaValida(permisos);
 

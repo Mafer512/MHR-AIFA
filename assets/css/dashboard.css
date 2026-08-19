@@ -659,3 +659,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             cursor: default;
         }
+
+/* Historial SO en sólo lectura: se consulta, no se modifica.
+   Complementa a las políticas de la base, que son la restricción real. */
+#historial-section.mhr-sin-edicion .hso-edit-trigger,
+#historial-section.mhr-sin-edicion .hso-edit-report-btn,
+#historial-section.mhr-sin-edicion .hso-delete-report-btn {
+    display: none !important;
+}
