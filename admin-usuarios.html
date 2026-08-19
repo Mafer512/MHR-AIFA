@@ -1052,7 +1052,7 @@
 ═══════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-<script src="./js/services/permissions-service.js"></script>
+<script src="./js/services/permissions-service.js?v=2"></script>
 <script>
 (function () {
   'use strict';
@@ -2548,16 +2548,19 @@
       return;
     }
 
-    // Perfiles rápidos
-    html += '<div class="px-4 pt-4">' +
-      '<div class="pm-grupo-tit"><i class="fa fa-wand-magic-sparkles"></i>Perfiles rápidos</div>' +
-      '<div class="d-flex flex-wrap gap-2 mb-4">' +
-      api.PERFILES.map(function (pf) {
-        return '<button type="button" class="pm-perfil" onclick="auPermPerfil(&quot;' + pf.id + '&quot;)">' +
-          '<i class="fa ' + pf.icono + ' text-' + pf.color + '"></i>' +
-          '<span><span class="pm-perfil-nombre d-block">' + pf.nombre + '</span>' +
-          '<span class="pm-perfil-desc">' + pf.desc + '</span></span></button>';
-      }).join('') + '</div>';
+    // Perfiles rápidos. Si el navegador sirvió una versión anterior del
+    // catálogo (sin PERFILES), se omiten en vez de romper el editor.
+    html += '<div class="px-4 pt-4">';
+    if (Array.isArray(api.PERFILES) && api.PERFILES.length) {
+      html += '<div class="pm-grupo-tit"><i class="fa fa-wand-magic-sparkles"></i>Perfiles rápidos</div>' +
+        '<div class="d-flex flex-wrap gap-2 mb-4">' +
+        api.PERFILES.map(function (pf) {
+          return '<button type="button" class="pm-perfil" onclick="auPermPerfil(&quot;' + pf.id + '&quot;)">' +
+            '<i class="fa ' + pf.icono + ' text-' + pf.color + '"></i>' +
+            '<span><span class="pm-perfil-nombre d-block">' + pf.nombre + '</span>' +
+            '<span class="pm-perfil-desc">' + pf.desc + '</span></span></button>';
+        }).join('') + '</div>';
+    }
 
     // Vistas agrupadas
     var grupos = [];
@@ -2578,10 +2581,10 @@
         if (v.editable) opts.push(['editar', 'fa-pen', 'Ver y editar']);
 
         html += '<div class="pm-vista' + (nivel !== 'ninguno' ? ' on-' + nivel : '') + '">' +
-          '<span class="pm-vista-ico"><i class="fa ' + v.icono + '"></i></span>' +
+          '<span class="pm-vista-ico"><i class="fa ' + (v.icono || 'fa-window-maximize') + '"></i></span>' +
           '<span style="min-width:0;flex:1">' +
             '<span class="pm-vista-nom d-block">' + v.label + '</span>' +
-            '<span class="pm-vista-desc">' + v.desc + '</span>' +
+            '<span class="pm-vista-desc">' + (v.desc || '') + '</span>' +
           '</span>' +
           '<span class="pm-seg">' +
           opts.map(function (o) {
@@ -2635,7 +2638,7 @@
       hubo = true;
       out += '<div class="pm-preview-grupo">' + g.nombre + '</div>';
       visibles.forEach(function (v) {
-        out += '<div class="pm-preview-item"><i class="fa ' + v.icono + '" style="width:15px"></i>' +
+        out += '<div class="pm-preview-item"><i class="fa ' + (v.icono || 'fa-window-maximize') + '" style="width:15px"></i>' +
           v.label +
           (u.editar.indexOf(v.key) !== -1 ? '<span class="pm-preview-badge">CAPTURA</span>' : '') +
           '</div>';
@@ -2668,7 +2671,7 @@
   window.auPermPerfil = function (id) {
     var api = window.MHRPermissions;
     var u = _pmUsers.find(function (x) { return x.user_id === _pmSel; });
-    var pf = api.PERFILES.find(function (x) { return x.id === id; });
+    var pf = (api.PERFILES || []).find(function (x) { return x.id === id; });
     if (!u || !pf || u.total) return;
     // Los perfiles no tocan el acceso a Administración: se decide aparte.
     var admin = u.ver.indexOf('admin-usuarios') !== -1;
