@@ -23,13 +23,67 @@
     // la sección (<key>-section). Es la única fuente de verdad, compartida por
     // la aplicación y el panel de administración.
     var VISTAS = [
-        { grupo: 'Seguridad Operacional', key: 'revision', label: 'Formato de Revisión', editable: true },
-        { grupo: 'Seguridad Operacional', key: 'historial', label: 'Historial SO', editable: false },
-        { grupo: 'Seguridad Operacional', key: 'estadistica', label: 'Estadística SO', editable: false },
-        { grupo: 'Control de Fauna', key: 'fauna', label: 'Captura de Fauna', editable: true },
-        { grupo: 'Control de Fauna', key: 'historial-fauna', label: 'Historial de Fauna', editable: false },
-        { grupo: 'Control de Fauna', key: 'estadistica-fauna', label: 'Estadística de Fauna', editable: false },
-        { grupo: 'Administración', key: 'admin-usuarios', label: 'Administración', editable: false }
+        {
+            grupo: 'Seguridad Operacional', key: 'revision', label: 'Formato de Revisión', editable: true,
+            icono: 'fa-clipboard-check', desc: 'Capturar la revisión del área de movimiento'
+        },
+        {
+            grupo: 'Seguridad Operacional', key: 'historial', label: 'Historial SO', editable: false,
+            icono: 'fa-clock-rotate-left', desc: 'Consultar reportes anteriores y sus PDF'
+        },
+        {
+            grupo: 'Seguridad Operacional', key: 'estadistica', label: 'Estadística SO', editable: false,
+            icono: 'fa-chart-column', desc: 'Gráficas e indicadores de seguridad operacional'
+        },
+        {
+            grupo: 'Control de Fauna', key: 'fauna', label: 'Captura de Fauna', editable: true,
+            icono: 'fa-dove', desc: 'Impactos, rescates y notificaciones AFAC'
+        },
+        {
+            grupo: 'Control de Fauna', key: 'historial-fauna', label: 'Historial de Fauna', editable: false,
+            icono: 'fa-clock-rotate-left', desc: 'Consultar los reportes de fauna registrados'
+        },
+        {
+            grupo: 'Control de Fauna', key: 'estadistica-fauna', label: 'Estadística de Fauna', editable: false,
+            icono: 'fa-chart-pie', desc: 'Gráficas, mapa de hallazgos y forma AFAC'
+        },
+        {
+            grupo: 'Administración', key: 'admin-usuarios', label: 'Administración', editable: false,
+            icono: 'fa-user-gear', desc: 'Usuarios, organigrama, permisos y correo'
+        }
+    ];
+
+    // Perfiles rápidos para asignar permisos de un clic
+    var PERFILES = [
+        {
+            id: 'consulta', nombre: 'Solo consulta', icono: 'fa-eye', color: 'primary',
+            desc: 'Ve todo, no captura nada',
+            ver: ['revision', 'historial', 'estadistica', 'fauna', 'historial-fauna', 'estadistica-fauna'],
+            editar: []
+        },
+        {
+            id: 'so', nombre: 'Capturista SO', icono: 'fa-clipboard-check', color: 'success',
+            desc: 'Captura revisiones del área de movimiento',
+            ver: ['revision', 'historial', 'estadistica'],
+            editar: ['revision']
+        },
+        {
+            id: 'fauna', nombre: 'Capturista Fauna', icono: 'fa-dove', color: 'success',
+            desc: 'Captura reportes de control de fauna',
+            ver: ['fauna', 'historial-fauna', 'estadistica-fauna'],
+            editar: ['fauna']
+        },
+        {
+            id: 'completo', nombre: 'Captura todo', icono: 'fa-star', color: 'warning',
+            desc: 'Captura en ambos módulos',
+            ver: ['revision', 'historial', 'estadistica', 'fauna', 'historial-fauna', 'estadistica-fauna'],
+            editar: ['revision', 'fauna']
+        },
+        {
+            id: 'ninguno', nombre: 'Sin acceso', icono: 'fa-ban', color: 'secondary',
+            desc: 'Quita todas las vistas',
+            ver: [], editar: []
+        }
     ];
 
     // Roles con acceso completo: no dependen de las listas.
@@ -126,6 +180,7 @@
 
     window.MHRPermissions = {
         VISTAS: VISTAS,
+        PERFILES: PERFILES,
         ROLES_TOTALES: ROLES_TOTALES,
         ROLES_EDITORES: ROLES_EDITORES,
         todasLasClaves: todasLasClaves,

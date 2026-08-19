@@ -224,6 +224,115 @@
     .au-action-btn.danger { color: #ef4444; } 
     .au-action-btn.danger:hover { background: #fef2f2; border-color: #fca5a5; }
     .au-action-btn.warn:hover { background: #fffbeb; border-color: #fcd34d; color: #d97706; }
+
+    /* ═══════ PERMISOS DE VISTAS ═══════ */
+    .pm-wrap { display:grid; grid-template-columns:300px 1fr; gap:18px; align-items:start; }
+    @media (max-width: 900px) { .pm-wrap { grid-template-columns:1fr; } }
+
+    .pm-panel {
+      background:var(--au-white); border:1px solid var(--au-border);
+      border-radius:14px; overflow:hidden;
+    }
+
+    /* Lista de usuarios */
+    .pm-list { max-height:620px; overflow-y:auto; }
+    .pm-user {
+      display:flex; align-items:center; gap:10px; width:100%;
+      padding:10px 14px; border:none; background:none; text-align:left;
+      border-left:3px solid transparent; cursor:pointer; transition:background .12s;
+    }
+    .pm-user:hover { background:#f8fafc; }
+    .pm-user.active { background:#eff6ff; border-left-color:var(--au-primary); }
+    .pm-avatar {
+      width:34px; height:34px; border-radius:50%; flex:0 0 auto;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-weight:700; font-size:12px;
+    }
+    .pm-user-name {
+      font-size:13px; font-weight:600; color:var(--au-text); line-height:1.25;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .pm-user-meta { font-size:11px; color:var(--au-muted); }
+    .pm-dot { width:8px; height:8px; border-radius:50%; background:var(--au-primary); flex:0 0 auto; }
+
+    /* Encabezado del usuario seleccionado */
+    .pm-head {
+      display:flex; align-items:center; gap:14px;
+      padding:16px 20px; border-bottom:1px solid var(--au-border);
+      background:linear-gradient(135deg,#f8fafc,#eef2ff);
+    }
+
+    /* Perfiles rápidos */
+    .pm-perfil {
+      border:1px solid var(--au-border); background:var(--au-white);
+      border-radius:10px; padding:9px 13px; cursor:pointer;
+      display:flex; align-items:center; gap:9px; transition:all .12s; text-align:left;
+    }
+    .pm-perfil:hover { border-color:var(--au-primary); background:#f8fbff; transform:translateY(-1px); }
+    .pm-perfil-nombre { font-size:12.5px; font-weight:700; color:var(--au-text); line-height:1.2; }
+    .pm-perfil-desc  { font-size:10.5px; color:var(--au-muted); line-height:1.2; }
+
+    /* Grupos de vistas */
+    .pm-grupo-tit {
+      font-size:11px; font-weight:800; letter-spacing:.7px; text-transform:uppercase;
+      color:var(--au-muted); margin:0 0 8px; display:flex; align-items:center; gap:8px;
+    }
+    .pm-vista {
+      display:flex; align-items:center; gap:12px; padding:11px 14px;
+      border:1px solid var(--au-border); border-radius:11px; background:var(--au-white);
+      margin-bottom:8px; transition:border-color .12s, background .12s;
+    }
+    .pm-vista.on-ver    { border-color:#bfdbfe; background:#f7fbff; }
+    .pm-vista.on-editar { border-color:#bbf7d0; background:#f6fefa; }
+    .pm-vista-ico {
+      width:34px; height:34px; border-radius:9px; flex:0 0 auto;
+      display:flex; align-items:center; justify-content:center;
+      background:#f1f5f9; color:var(--au-muted); font-size:14px;
+    }
+    .pm-vista.on-ver    .pm-vista-ico { background:#dbeafe; color:#1d4ed8; }
+    .pm-vista.on-editar .pm-vista-ico { background:#dcfce7; color:#15803d; }
+    .pm-vista-nom  { font-size:13.5px; font-weight:700; color:var(--au-text); line-height:1.25; }
+    .pm-vista-desc { font-size:11.5px; color:var(--au-muted); line-height:1.3; }
+
+    /* Control de tres estados */
+    .pm-seg { display:inline-flex; background:#f1f5f9; border-radius:9px; padding:3px; gap:3px; flex:0 0 auto; }
+    .pm-seg button {
+      border:none; background:none; border-radius:7px; cursor:pointer;
+      padding:5px 11px; font-size:11.5px; font-weight:700; color:var(--au-muted);
+      display:flex; align-items:center; gap:5px; transition:all .12s; white-space:nowrap;
+    }
+    .pm-seg button:hover:not(.sel) { background:rgba(255,255,255,.75); color:var(--au-text); }
+    .pm-seg button.sel { background:var(--au-white); box-shadow:0 1px 3px rgba(0,0,0,.14); }
+    .pm-seg button.sel[data-n="ninguno"] { color:#64748b; }
+    .pm-seg button.sel[data-n="ver"]     { color:#1d4ed8; }
+    .pm-seg button.sel[data-n="editar"]  { color:#15803d; }
+
+    /* Vista previa del menú */
+    .pm-preview {
+      background:#151b2b; border-radius:12px; padding:12px 10px; min-height:80px;
+    }
+    .pm-preview-item {
+      display:flex; align-items:center; gap:9px; padding:7px 12px;
+      color:rgba(255,255,255,.82); font-size:12.5px; border-radius:7px;
+    }
+    .pm-preview-grupo {
+      font-size:10px; font-weight:800; letter-spacing:.7px; text-transform:uppercase;
+      color:rgba(255,255,255,.42); padding:8px 12px 3px;
+    }
+    .pm-preview-badge {
+      margin-left:auto; font-size:9.5px; font-weight:800; padding:1px 6px;
+      border-radius:5px; background:rgba(34,197,94,.22); color:#86efac;
+    }
+    .pm-preview-vacio { color:rgba(255,255,255,.42); font-size:12px; padding:14px 12px; text-align:center; }
+
+    /* Barra de guardado */
+    .pm-bar {
+      position:sticky; bottom:0; z-index:5; margin-top:14px;
+      background:var(--au-white); border:1px solid var(--au-border);
+      border-radius:12px; padding:10px 16px;
+      display:flex; align-items:center; gap:12px;
+      box-shadow:0 -3px 14px rgba(0,0,0,.07);
+    }
   </style>
 </head>
 <body>
@@ -485,36 +594,32 @@
             </h5>
             <span id="au-perm-status" class="small text-muted">&ndash;</span>
           </div>
-          <div class="ms-auto d-flex gap-2 align-items-center flex-wrap">
-            <input id="au-perm-search" class="form-control form-control-sm" style="width:220px"
-                   placeholder="Buscar usuario&hellip;" oninput="auPermRender()">
+          <div class="ms-auto">
             <button class="btn btn-sm btn-outline-secondary" onclick="auPermLoad()">
               <i class="fa fa-rotate me-1"></i>Recargar
             </button>
-            <button class="btn btn-sm btn-primary" onclick="auPermSaveAll()">
-              <i class="fa fa-save me-1"></i>Guardar cambios
-            </button>
           </div>
         </div>
 
-        <div class="alert alert-info d-flex gap-2 align-items-start" style="font-size:13px">
-          <i class="fa fa-circle-info mt-1"></i>
-          <div>
-            Define qu&eacute; puede ver cada usuario y d&oacute;nde puede capturar.
-            <b>Sin acceso</b> oculta la vista del men&uacute; lateral;
-            <b>Ver</b> permite consultar sin capturar;
-            <b>Ver y editar</b> habilita la captura de reportes.
-            Los roles <b>admin</b>, <b>superuser</b> y <b>superadmin</b> siempre tienen acceso completo.
-          </div>
-        </div>
+        <div class="pm-wrap">
 
-        <div class="table-responsive" style="background:var(--au-surface);border-radius:12px">
-          <table class="table table-hover align-middle mb-0" style="font-size:13px">
-            <thead id="au-perm-head"></thead>
-            <tbody id="au-perm-body">
-              <tr><td class="text-muted p-4">Abre la pesta&ntilde;a para cargar&hellip;</td></tr>
-            </tbody>
-          </table>
+          <!-- Columna izquierda: usuarios -->
+          <div class="pm-panel">
+            <div class="p-3 border-bottom">
+              <div class="position-relative">
+                <i class="fa fa-search position-absolute text-muted"
+                   style="left:11px;top:50%;transform:translateY(-50%);font-size:12px"></i>
+                <input id="au-perm-search" class="form-control form-control-sm" style="padding-left:31px"
+                       placeholder="Buscar persona&hellip;" oninput="auPermRenderList()">
+              </div>
+            </div>
+            <div class="pm-list" id="au-perm-list">
+              <div class="text-muted p-4 small">Cargando&hellip;</div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: editor -->
+          <div id="au-perm-editor"></div>
         </div>
       </div>
 
@@ -2275,7 +2380,23 @@
   // ════════════════════════════════════════════════
   // Estado propio: esta pestaña consulta por su cuenta para no depender del
   // orden en que se haya abierto la pestaña de Usuarios.
-  var _auPermUsers = [];
+  var _pmUsers = [];
+  var _pmSel   = null;   // user_id seleccionado
+
+  function _pmEsc(t) {
+    return String(t == null ? '' : t)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function _pmNivel(u, key) {
+    if (u.ver.indexOf(key) === -1) return 'ninguno';
+    return u.editar.indexOf(key) !== -1 ? 'editar' : 'ver';
+  }
+
+  function _pmSucios() {
+    return _pmUsers.filter(function (u) { return u.sucio && !u.total; });
+  }
 
   window.auPermLoad = async function () {
     var api = window.MHRPermissions;
@@ -2312,12 +2433,11 @@
         }
       }
 
-      var roles = {};
+      var roles = {}, perfiles = {};
       if (!ur.error) (ur.data || []).forEach(function (r) { roles[r.user_id] = r; });
-      var perfiles = {};
       if (!pf.error) (pf.data || []).forEach(function (r) { perfiles[r.id] = r; });
 
-      _auPermUsers = usuarios.map(function (u) {
+      _pmUsers = usuarios.map(function (u) {
         var fila = roles[u.user_id] || {};
         var prof = perfiles[u.user_id] || {};
         var rol  = u.role || fila.role || '';
@@ -2326,6 +2446,7 @@
           user_id: u.user_id,
           nombre: prof.full_name || u.full_name || prof.username || u.username || u.email || '(sin nombre)',
           correo: u.email || '',
+          cargo: prof.cargo || '',
           rol: rol,
           permissions: fila.permissions,
           ver: norm.ver.slice(),
@@ -2335,8 +2456,10 @@
         };
       }).sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); });
 
-      auPermRender();
-      if (st) { st.textContent = _auPermUsers.length + ' usuarios'; st.className = 'small text-success'; }
+      if (!_pmSel && _pmUsers.length) _pmSel = _pmUsers[0].user_id;
+      auPermRenderList();
+      auPermRenderEditor();
+      if (st) { st.textContent = _pmUsers.length + ' usuarios con acceso a MHR'; st.className = 'small text-success'; }
     } catch (e) {
       console.error(e);
       if (st) { st.textContent = 'Error: ' + e.message; st.className = 'small text-danger'; }
@@ -2344,75 +2467,224 @@
     }
   };
 
-  window.auPermRender = function () {
-    var api = window.MHRPermissions;
-    var head = _el('au-perm-head');
-    var body = _el('au-perm-body');
-    if (!api || !head || !body) return;
-    var vistas = api.VISTAS;
-
-    head.innerHTML = '<tr><th style="min-width:210px">Usuario</th>' +
-      vistas.map(function (v) {
-        return '<th class="text-center" style="min-width:148px">' +
-          '<div style="font-size:9px;color:var(--au-muted);text-transform:uppercase;letter-spacing:.4px">' +
-          v.grupo + '</div>' + v.label + '</th>';
-      }).join('') + '</tr>';
-
+  // ── Lista de usuarios ──────────────────────────────────────────────────
+  window.auPermRenderList = function () {
+    var cont = _el('au-perm-list');
+    if (!cont) return;
     var q = String((_el('au-perm-search') || {}).value || '').toLowerCase().trim();
-    var lista = _auPermUsers.filter(function (u) {
+
+    var lista = _pmUsers.filter(function (u) {
       return !q || (u.nombre + ' ' + u.correo + ' ' + u.rol).toLowerCase().indexOf(q) !== -1;
     });
 
     if (!lista.length) {
-      body.innerHTML = '<tr><td colspan="' + (vistas.length + 1) +
-        '" class="text-muted p-4">Sin usuarios que coincidan.</td></tr>';
+      cont.innerHTML = '<div class="text-muted p-4 small">Sin coincidencias.</div>';
       return;
     }
 
-    body.innerHTML = lista.map(function (u) {
-      var idx = _auPermUsers.indexOf(u);
-      var celdas = vistas.map(function (v) {
-        if (u.total) {
-          return '<td class="text-center"><span class="badge bg-danger-subtle text-danger">Total</span></td>';
-        }
-        var nivel = u.ver.indexOf(v.key) === -1
-          ? 'ninguno'
-          : (u.editar.indexOf(v.key) !== -1 ? 'editar' : 'ver');
-        var opts = [['ninguno', 'Sin acceso'], ['ver', 'Ver']];
-        if (v.editable) opts.push(['editar', 'Ver y editar']);
-        return '<td class="text-center"><select class="form-select form-select-sm" style="font-size:12px" ' +
-          'onchange="auPermSet(' + idx + ',&quot;' + v.key + '&quot;,this.value)">' +
-          opts.map(function (o) {
-            return '<option value="' + o[0] + '"' + (o[0] === nivel ? ' selected' : '') + '>' + o[1] + '</option>';
-          }).join('') + '</select></td>';
-      }).join('');
-
-      return '<tr' + (u.sucio ? ' style="background:rgba(13,110,253,.07)"' : '') + '>' +
-        '<td><div class="fw-semibold">' + u.nombre +
-        (u.sucio ? ' <i class="fa fa-pen text-primary ms-1" style="font-size:10px"></i>' : '') + '</div>' +
-        '<div class="text-muted" style="font-size:11px">' + (u.rol || '—') + '</div></td>' +
-        celdas + '</tr>';
+    cont.innerHTML = lista.map(function (u) {
+      var resumen = u.total
+        ? 'Acceso completo'
+        : (u.ver.length ? u.ver.length + ' vista' + (u.ver.length === 1 ? '' : 's') +
+            (u.editar.length ? ' · ' + u.editar.length + ' con captura' : '')
+          : 'Sin acceso');
+      return '<button type="button" class="pm-user' + (u.user_id === _pmSel ? ' active' : '') + '"' +
+        ' onclick="auPermSelect(&quot;' + u.user_id + '&quot;)">' +
+        '<span class="pm-avatar" style="background:' + _avatarColor(u.nombre) + '">' +
+          _initials(u.nombre) + '</span>' +
+        '<span style="min-width:0;flex:1">' +
+          '<span class="pm-user-name d-block">' + _pmEsc(u.nombre) + '</span>' +
+          '<span class="pm-user-meta">' + _pmEsc(u.rol || '—') + ' · ' + resumen + '</span>' +
+        '</span>' +
+        (u.sucio ? '<span class="pm-dot" title="Cambios sin guardar"></span>' : '') +
+        '</button>';
     }).join('');
   };
 
-  window.auPermSet = function (idx, key, nivel) {
-    var u = _auPermUsers[idx];
+  window.auPermSelect = function (userId) {
+    _pmSel = userId;
+    auPermRenderList();
+    auPermRenderEditor();
+  };
+
+  // ── Editor del usuario seleccionado ────────────────────────────────────
+  window.auPermRenderEditor = function () {
+    var cont = _el('au-perm-editor');
+    var api  = window.MHRPermissions;
+    if (!cont || !api) return;
+
+    var u = _pmUsers.find(function (x) { return x.user_id === _pmSel; });
+    if (!u) {
+      cont.innerHTML = '<div class="pm-panel p-5 text-center text-muted">' +
+        '<i class="fa fa-user-shield fa-2x mb-3 d-block" style="opacity:.35"></i>' +
+        'Selecciona una persona para configurar lo que puede ver.</div>';
+      return;
+    }
+
+    // Encabezado
+    var html = '<div class="pm-panel">' +
+      '<div class="pm-head">' +
+        '<span class="pm-avatar" style="width:46px;height:46px;font-size:15px;background:' +
+          _avatarColor(u.nombre) + '">' + _initials(u.nombre) + '</span>' +
+        '<div style="min-width:0">' +
+          '<div class="fw-bold" style="font-size:15px;color:var(--au-text)">' + _pmEsc(u.nombre) + '</div>' +
+          '<div class="text-muted" style="font-size:12px">' +
+            _pmEsc(u.correo || '') + (u.cargo ? ' · ' + _pmEsc(u.cargo) : '') + '</div>' +
+        '</div>' +
+        '<span class="badge bg-' + (ROLE_COLORS[u.rol] || 'secondary') + ' ms-auto">' +
+          _pmEsc(u.rol || 'sin rol') + '</span>' +
+      '</div>';
+
+    if (u.total) {
+      html += '<div class="p-4">' +
+        '<div class="alert alert-danger d-flex gap-3 align-items-start mb-0" style="font-size:13px">' +
+          '<i class="fa fa-crown mt-1"></i>' +
+          '<div><b>Acceso completo por su rol.</b><br>' +
+          'Los roles <b>admin</b>, <b>superuser</b> y <b>superadmin</b> ven todas las secciones ' +
+          'y no se limitan desde aquí. Para restringir a esta persona, cámbiale el rol en la ' +
+          'pestaña <b>Usuarios</b>.</div>' +
+        '</div></div></div>';
+      cont.innerHTML = html;
+      return;
+    }
+
+    // Perfiles rápidos
+    html += '<div class="px-4 pt-4">' +
+      '<div class="pm-grupo-tit"><i class="fa fa-wand-magic-sparkles"></i>Perfiles rápidos</div>' +
+      '<div class="d-flex flex-wrap gap-2 mb-4">' +
+      api.PERFILES.map(function (pf) {
+        return '<button type="button" class="pm-perfil" onclick="auPermPerfil(&quot;' + pf.id + '&quot;)">' +
+          '<i class="fa ' + pf.icono + ' text-' + pf.color + '"></i>' +
+          '<span><span class="pm-perfil-nombre d-block">' + pf.nombre + '</span>' +
+          '<span class="pm-perfil-desc">' + pf.desc + '</span></span></button>';
+      }).join('') + '</div>';
+
+    // Vistas agrupadas
+    var grupos = [];
+    api.VISTAS.forEach(function (v) {
+      var g = grupos.find(function (x) { return x.nombre === v.grupo; });
+      if (!g) { g = { nombre: v.grupo, items: [] }; grupos.push(g); }
+      g.items.push(v);
+    });
+
+    grupos.forEach(function (g) {
+      html += '<div class="pm-grupo-tit"><i class="fa fa-layer-group"></i>' + g.nombre + '</div>';
+      g.items.forEach(function (v) {
+        var nivel = _pmNivel(u, v.key);
+        var opts = [
+          ['ninguno', 'fa-ban', 'Sin acceso'],
+          ['ver', 'fa-eye', 'Ver']
+        ];
+        if (v.editable) opts.push(['editar', 'fa-pen', 'Ver y editar']);
+
+        html += '<div class="pm-vista' + (nivel !== 'ninguno' ? ' on-' + nivel : '') + '">' +
+          '<span class="pm-vista-ico"><i class="fa ' + v.icono + '"></i></span>' +
+          '<span style="min-width:0;flex:1">' +
+            '<span class="pm-vista-nom d-block">' + v.label + '</span>' +
+            '<span class="pm-vista-desc">' + v.desc + '</span>' +
+          '</span>' +
+          '<span class="pm-seg">' +
+          opts.map(function (o) {
+            return '<button type="button" data-n="' + o[0] + '"' +
+              (o[0] === nivel ? ' class="sel"' : '') +
+              ' onclick="auPermSet(&quot;' + v.key + '&quot;,&quot;' + o[0] + '&quot;)">' +
+              '<i class="fa ' + o[1] + '"></i>' + o[2] + '</button>';
+          }).join('') +
+          '</span></div>';
+      });
+      html += '<div class="mb-3"></div>';
+    });
+
+    // Vista previa del menú lateral
+    html += '<div class="pm-grupo-tit"><i class="fa fa-bars"></i>Así verá su menú</div>' +
+      '<div class="pm-preview mb-4">' + _pmPreview(u) + '</div>';
+
+    html += '</div></div>';   // cierra px-4 y pm-panel
+
+    // Barra de guardado
+    var sucios = _pmSucios().length;
+    html += '<div class="pm-bar">' +
+      (sucios
+        ? '<i class="fa fa-circle-exclamation text-primary"></i>' +
+          '<span style="font-size:13px"><b>' + sucios + '</b> ' +
+          (sucios === 1 ? 'persona con cambios sin guardar' : 'personas con cambios sin guardar') + '</span>'
+        : '<i class="fa fa-check text-success"></i>' +
+          '<span class="text-muted" style="font-size:13px">Todo guardado</span>') +
+      '<span class="ms-auto d-flex gap-2">' +
+      (sucios ? '<button class="btn btn-sm btn-outline-secondary" onclick="auPermLoad()">Descartar</button>' : '') +
+      '<button class="btn btn-sm btn-primary" onclick="auPermSaveAll()"' + (sucios ? '' : ' disabled') + '>' +
+      '<i class="fa fa-save me-1"></i>Guardar cambios</button></span></div>';
+
+    cont.innerHTML = html;
+  };
+
+  function _pmPreview(u) {
+    var api = window.MHRPermissions;
+    var out = '', hubo = false;
+    var grupos = [];
+    api.VISTAS.forEach(function (v) {
+      if (v.key === 'admin-usuarios') return;
+      var g = grupos.find(function (x) { return x.nombre === v.grupo; });
+      if (!g) { g = { nombre: v.grupo, items: [] }; grupos.push(g); }
+      g.items.push(v);
+    });
+
+    grupos.forEach(function (g) {
+      var visibles = g.items.filter(function (v) { return u.ver.indexOf(v.key) !== -1; });
+      if (!visibles.length) return;      // grupo vacío: no se muestra
+      hubo = true;
+      out += '<div class="pm-preview-grupo">' + g.nombre + '</div>';
+      visibles.forEach(function (v) {
+        out += '<div class="pm-preview-item"><i class="fa ' + v.icono + '" style="width:15px"></i>' +
+          v.label +
+          (u.editar.indexOf(v.key) !== -1 ? '<span class="pm-preview-badge">CAPTURA</span>' : '') +
+          '</div>';
+      });
+    });
+
+    if (u.ver.indexOf('admin-usuarios') !== -1) {
+      hubo = true;
+      out += '<div class="pm-preview-grupo">Administración</div>' +
+        '<div class="pm-preview-item"><i class="fa fa-user-gear" style="width:15px"></i>Administración</div>';
+    }
+
+    return hubo ? out
+      : '<div class="pm-preview-vacio"><i class="fa fa-eye-slash me-2"></i>' +
+        'No verá ninguna sección al entrar</div>';
+  }
+
+  window.auPermSet = function (key, nivel) {
+    var u = _pmUsers.find(function (x) { return x.user_id === _pmSel; });
     if (!u || u.total) return;
     u.ver    = u.ver.filter(function (k) { return k !== key; });
     u.editar = u.editar.filter(function (k) { return k !== key; });
     if (nivel === 'ver' || nivel === 'editar') u.ver.push(key);
     if (nivel === 'editar') u.editar.push(key);
     u.sucio = true;
-    auPermRender();
+    auPermRenderList();
+    auPermRenderEditor();
+  };
+
+  window.auPermPerfil = function (id) {
+    var api = window.MHRPermissions;
+    var u = _pmUsers.find(function (x) { return x.user_id === _pmSel; });
+    var pf = api.PERFILES.find(function (x) { return x.id === id; });
+    if (!u || !pf || u.total) return;
+    // Los perfiles no tocan el acceso a Administración: se decide aparte.
+    var admin = u.ver.indexOf('admin-usuarios') !== -1;
+    u.ver = pf.ver.slice();
+    u.editar = pf.editar.slice();
+    if (admin) u.ver.push('admin-usuarios');
+    u.sucio = true;
+    auPermRenderList();
+    auPermRenderEditor();
   };
 
   window.auPermSaveAll = async function () {
     var api = window.MHRPermissions;
-    var pend = _auPermUsers.filter(function (u) { return u.sucio && !u.total; });
-    if (!pend.length) {
-      if (window.showToast) showToast('No hay cambios por guardar', 'info');
-      return;
-    }
+    var pend = _pmSucios();
+    if (!pend.length) return;
+
     var st = _el('au-perm-status');
     if (st) { st.textContent = 'Guardando…'; st.className = 'small text-warning'; }
 
@@ -2431,13 +2703,14 @@
       }
     }
 
-    auPermRender();
+    auPermRenderList();
+    auPermRenderEditor();
     if (fallidos.length) {
       if (window.showToast) showToast('Guardados ' + ok + '. Fallaron: ' + fallidos.join(' | '), 'danger');
       if (st) { st.textContent = fallidos.length + ' con error'; st.className = 'small text-danger'; }
     } else {
-      if (window.showToast) showToast('Permisos actualizados (' + ok + ' usuarios)', 'success');
-      if (st) { st.textContent = _auPermUsers.length + ' usuarios'; st.className = 'small text-success'; }
+      if (window.showToast) showToast('Permisos actualizados (' + ok + ')', 'success');
+      if (st) { st.textContent = _pmUsers.length + ' usuarios con acceso a MHR'; st.className = 'small text-success'; }
     }
   };
 
