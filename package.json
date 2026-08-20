@@ -8,7 +8,7 @@
     "check:security": "node scripts/quality/check-no-service-key.js",
     "check:utils": "node scripts/quality/check-utils-api.js",
     "check:sw": "node scripts/quality/check-sw-cache.js",
-    "check": "npm run check:security && npm run check:utils && npm run check:sw && node scripts/quality/check-admin-database.js",
+    "check": "npm run check:security && npm run check:utils && npm run check:sw && node scripts/quality/check-admin-database.js && node scripts/quality/check-historial-tabs.js",
     "gen:icons": "node scripts/generate-icons.js"
   },
   "devDependencies": {

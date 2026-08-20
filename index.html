@@ -7,7 +7,7 @@
     <title>MHR · AIFA</title>
     <meta name="description" content="Sistema institucional de reportes de mantenimiento y seguridad operacional del Aeropuerto Internacional Felipe Ángeles.">
     <!-- PWA: manifest e iconos -->
-    <link rel="manifest" href="./manifest.webmanifest?v=20260820.1">
+    <link rel="manifest" href="./manifest.webmanifest?v=20260820.2">
     <meta name="theme-color" content="#1e3a5f">
     <meta name="color-scheme" content="dark light">
     <meta name="application-name" content="MHR">
@@ -27,7 +27,7 @@
         (function () {
             if (!('serviceWorker' in navigator)) return;
 
-            var PWA_VERSION = '20260820.1';
+            var PWA_VERSION = '20260820.2';
             var hadController = !!navigator.serviceWorker.controller;
             var reloadingForUpdate = false;
             var registration = null;
@@ -1716,10 +1716,6 @@
                     style="padding:10px 22px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:3px solid #2563eb;color:#2563eb;cursor:pointer;margin-bottom:-2px;">
                     📋 Historial
                 </button>
-                <button id="hso-tab-datos" onclick="hsoSwitchTab('datos')"
-                    style="padding:10px 22px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:3px solid transparent;color:#6b7280;cursor:pointer;margin-bottom:-2px;">
-                    🗂️ Vista de Datos
-                </button>
             </div>
 
             <!-- Panel Historial -->
@@ -1835,37 +1831,6 @@
                 </div>
             </div>
             </div> <!-- /hso-panel-historial -->
-
-            <!-- Panel Vista de Datos -->
-            <div id="hso-panel-datos" style="display:none;">
-                <!-- Toolbar -->
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
-                    <input id="hso-search" type="search" placeholder="🔍  Buscar en toda la tabla…"
-                        style="flex:1;min-width:200px;max-width:360px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"
-                        oninput="hsoApplySearch()" />
-                    <button onclick="hsoExportExcel()"
-                        style="padding:8px 18px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
-                        📥 Descargar Excel
-                    </button>
-                    <button onclick="window.loadAdminReports && window.loadAdminReports()"
-                        style="padding:8px 14px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;">
-                        🔄 Actualizar
-                    </button>
-                    <span id="hso-count" style="margin-left:auto;font-size:12px;color:#6b7280;white-space:nowrap;"></span>
-                </div>
-                <!-- Fila de filtros por columna -->
-                <div id="hso-col-filters" style="display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:6px;padding-bottom:4px;"></div>
-                <!-- Tabla con cabecera sticky -->
-                <div style="overflow:auto;max-height:65vh;border:1px solid #e5e7eb;border-radius:10px;">
-                    <table id="hso-data-table" style="width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap;">
-                        <thead id="hso-data-thead" style="position:sticky;top:0;z-index:2;background:#1e3a5f;color:#fff;"></thead>
-                        <tbody id="hso-data-tbody">
-                            <tr><td colspan="11" style="padding:30px;text-align:center;color:#6b7280;">Cambia a Vista de Datos para cargar…</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- /hso-panel-datos -->
 
         </div> <!-- End historial-section -->
         <!-- Estadísticas Section -->

@@ -563,8 +563,6 @@
             populateResponsableFilter(allReports);
             renderReports(allReports);
             if (hsoMailIsAdmin()) window.hsoMailLoadRecipients();
-            // Refresh Vista de Datos si está activa
-            if (typeof window._hsoRenderDataView === 'function') window._hsoRenderDataView();
         } catch (e) {
             console.error('[HistorialSO] Excepción al cargar:', e);
             showErrorState('Error al cargar reportes: ' + (e.message || e));
@@ -655,9 +653,7 @@
 
     window.hsoSwitchTab = function (tab) {
         var panelH = document.getElementById('hso-panel-historial');
-        var panelD = document.getElementById('hso-panel-datos');
         var btnH   = document.getElementById('hso-tab-historial');
-        var btnD   = document.getElementById('hso-tab-datos');
         var panelM = document.getElementById('hso-panel-destinatarios');
         var btnM   = document.getElementById('hso-tab-destinatarios');
 
@@ -666,264 +662,20 @@
 
         if (tab === 'historial') {
             if (panelH) panelH.style.display = '';
-            if (panelD) panelD.style.display = 'none';
             if (panelM) panelM.style.display = 'none';
             if (btnH) btnH.style.cssText = activeStyle;
-            if (btnD) btnD.style.cssText = inactiveStyle;
             if (btnM) btnM.style.cssText = inactiveStyle;
         } else if (tab === 'destinatarios') {
             if (panelH) panelH.style.display = 'none';
-            if (panelD) panelD.style.display = 'none';
             if (panelM) panelM.style.display = '';
             if (btnH) btnH.style.cssText = inactiveStyle;
-            if (btnD) btnD.style.cssText = inactiveStyle;
             if (btnM) btnM.style.cssText = activeStyle;
             if (hsoMailIsAdmin()) window.hsoMailLoadRecipients();
         } else {
-            if (panelH) panelH.style.display = 'none';
-            if (panelD) panelD.style.display = '';
-            if (panelM) panelM.style.display = 'none';
-            if (btnH) btnH.style.cssText = inactiveStyle;
-            if (btnD) btnD.style.cssText = activeStyle;
-            if (btnM) btnM.style.cssText = inactiveStyle;
-            if (typeof window._hsoRenderDataView === 'function') window._hsoRenderDataView();
+            window.hsoSwitchTab('historial');
         }
     };
 
-    // ─── Vista de Datos ──────────────────────────────────────────────────────
-
-    (function () {
-        var HSO_COLS = [
-            { key: 'folio',           label: 'Folio' },
-            { key: 'fecha_local',     label: 'Fecha Local' },
-            { key: 'created_at',      label: 'Creado' },
-            { key: 'responsable',     label: 'Responsable' },
-            { key: 'cargo',           label: 'Cargo' },
-            { key: 'tipo_inspeccion', label: 'Tipo Inspección' },
-            { key: 'turno',           label: 'Turno' },
-            { key: 'pista',           label: 'RWY' },
-            { key: 'estatus',         label: 'Estatus' },
-            { key: 'observacion',     label: 'Observación' },
-            { key: 'pdf_url',         label: 'PDF' }
-        ];
-
-        var _colFilters = {};
-        var _filtered   = [];
-
-        function _esc(s) {
-            return String(s == null ? '' : s)
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        function _fmt(key, val) {
-            if (val == null || val === '') return '<span style="color:#d1d5db">—</span>';
-            if (key === 'fecha_local' || key === 'created_at') {
-                try {
-                    var d = parseReportDate(val);
-                    if (d) {
-                        var pad = function (n) { return String(n).padStart(2, '0'); };
-                        return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() +
-                               ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-                    }
-                } catch (e) {}
-                return _esc(val);
-            }
-            if (key === 'pdf_url') {
-                var href = String(val);
-                if (!href.startsWith('http')) {
-                    href = 'https://fgstncvuuhpgyzmjceyr.supabase.co/storage/v1/object/public/reports/' + href;
-                }
-                return '<button class="hso-pdf-btn" data-pdf-url="' + _esc(href) + '" ' +
-                    'style="background:none;border:none;cursor:pointer;color:#2563eb;font-weight:600;font-size:inherit;padding:0;">📄 PDF</button>';
-            }
-            if (key === 'estatus') {
-                var colors = {
-                    'Atendido':    '#dcfce7;color:#166534',
-                    'No Atendido': '#fee2e2;color:#991b1b',
-                    'En Proceso':  '#fef9c3;color:#854d0e'
-                };
-                var c = colors[val] || '#f3f4f6;color:#374151';
-                return '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:' + c + ';">' + _esc(val) + '</span>';
-            }
-            return '<span title="' + _esc(val) + '" style="display:inline-block;max-width:220px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;">' + _esc(val) + '</span>';
-        }
-
-        function _renderTable() {
-            var search = ((document.getElementById('hso-search') || {}).value || '').trim().toLowerCase();
-
-            _filtered = allReports.filter(function (row) {
-                return HSO_COLS.every(function (col) {
-                    var set = _colFilters[col.key];
-                    if (!set || set.size === 0) return true;
-                    var v = String(row[col.key] == null ? '' : row[col.key]);
-                    return set.has(v);
-                });
-            });
-
-            if (search) {
-                _filtered = _filtered.filter(function (row) {
-                    return HSO_COLS.some(function (col) {
-                        return String(row[col.key] == null ? '' : row[col.key]).toLowerCase().includes(search);
-                    });
-                });
-            }
-
-            var tbody = document.getElementById('hso-data-tbody');
-            if (!tbody) return;
-
-            // PDF delegation for data view
-            tbody.onclick = function (e) {
-                var btn = e.target.closest('.hso-pdf-btn');
-                if (btn && btn.dataset.pdfUrl && typeof window.mhrOpenPdfPreview === 'function') {
-                    window.mhrOpenPdfPreview(btn.dataset.pdfUrl);
-                }
-            };
-
-            if (_filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="' + HSO_COLS.length + '" style="padding:30px;text-align:center;color:#6b7280;">Sin resultados</td></tr>';
-            } else {
-                var frag = document.createDocumentFragment();
-                _filtered.forEach(function (row, ri) {
-                    var tr = document.createElement('tr');
-                    tr.style.cssText = 'border-bottom:1px solid #e5e7eb;background:' + (ri % 2 === 0 ? '#fff' : '#f9fafb') + ';';
-                    tr.addEventListener('mouseenter', function () { this.style.background = '#eff6ff'; });
-                    tr.addEventListener('mouseleave', function () { this.style.background = (ri % 2 === 0 ? '#fff' : '#f9fafb'); });
-                    var cells = '';
-                    HSO_COLS.forEach(function (col) {
-                        cells += '<td style="padding:8px 12px;vertical-align:middle;border-right:1px solid #f3f4f6;">' + _fmt(col.key, row[col.key]) + '</td>';
-                    });
-                    tr.innerHTML = cells;
-                    frag.appendChild(tr);
-                });
-                tbody.innerHTML = '';
-                tbody.appendChild(frag);
-            }
-
-            var countEl = document.getElementById('hso-count');
-            if (countEl) countEl.textContent = _filtered.length + ' / ' + allReports.length + ' registros';
-        }
-
-        function _buildHeader() {
-            var thead = document.getElementById('hso-data-thead');
-            if (!thead) return;
-            var html = '<tr>';
-            HSO_COLS.forEach(function (col) {
-                html += '<th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:700;letter-spacing:.3px;border-right:1px solid #2d5a8e;white-space:nowrap;">' + col.label + '</th>';
-            });
-            html += '</tr>';
-            thead.innerHTML = html;
-        }
-
-        function _buildColFilters() {
-            var container = document.getElementById('hso-col-filters');
-            if (!container) return;
-            container.innerHTML = '';
-
-            var FILTERABLE = ['tipo_inspeccion', 'turno', 'pista', 'estatus', 'responsable'];
-
-            FILTERABLE.forEach(function (key) {
-                var col = HSO_COLS.find(function (c) { return c.key === key; });
-                if (!col) return;
-
-                var vals = [];
-                var seen = {};
-                allReports.forEach(function (r) {
-                    var v = String(r[key] == null ? '' : r[key]);
-                    if (!seen[v]) { seen[v] = true; vals.push(v); }
-                });
-                if (vals.length <= 1) return;
-
-                vals.sort(function (a, b) { return a.localeCompare(b, 'es'); });
-
-                var sel = document.createElement('select');
-                sel.style.cssText = 'padding:5px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;background:#fff;cursor:pointer;min-width:120px;max-width:170px;';
-                sel.title = 'Filtrar por ' + col.label;
-
-                var defOpt = document.createElement('option');
-                defOpt.value = '';
-                defOpt.textContent = col.label + ': todos';
-                sel.appendChild(defOpt);
-
-                vals.forEach(function (v) {
-                    var o = document.createElement('option');
-                    o.value = v;
-                    o.textContent = v === '' ? '(vacío)' : v;
-                    sel.appendChild(o);
-                });
-
-                sel.addEventListener('change', function () {
-                    if (this.value === '') {
-                        delete _colFilters[key];
-                    } else {
-                        _colFilters[key] = new Set([this.value]);
-                    }
-                    _renderTable();
-                });
-
-                container.appendChild(sel);
-            });
-
-            if (container.children.length > 0) {
-                var clearBtn = document.createElement('button');
-                clearBtn.textContent = '✕ Limpiar filtros';
-                clearBtn.style.cssText = 'padding:5px 12px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;background:#fff;cursor:pointer;color:#6b7280;white-space:nowrap;';
-                clearBtn.onclick = function () {
-                    _colFilters = {};
-                    container.querySelectorAll('select').forEach(function (s) { s.value = ''; });
-                    _renderTable();
-                };
-                container.appendChild(clearBtn);
-            }
-        }
-
-        // Excel export para Vista de Datos
-        window.hsoExportExcel = function () {
-            var rows = _filtered.length > 0 ? _filtered : allReports;
-            if (rows.length === 0) { alert('No hay datos para exportar.'); return; }
-
-            var BOM = '\uFEFF';
-            var headers = HSO_COLS.map(function (c) { return '"' + c.label.replace(/"/g, '""') + '"'; }).join(',');
-            var lines = [headers];
-            rows.forEach(function (row) {
-                var cells = HSO_COLS.map(function (col) {
-                    var v = row[col.key];
-                    if (v == null) v = '';
-                    if ((col.key === 'fecha_local' || col.key === 'created_at') && v) {
-                        try {
-                            var d = parseReportDate(v);
-                            if (d) {
-                                var p = function (n) { return String(n).padStart(2, '0'); };
-                                v = p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
-                            }
-                        } catch (e) {}
-                    }
-                    return '"' + String(v).replace(/"/g, '""') + '"';
-                });
-                lines.push(cells.join(','));
-            });
-
-            var csv = BOM + lines.join('\r\n');
-            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            var now = new Date();
-            var pad = function (n) { return String(n).padStart(2, '0'); };
-            a.href = url;
-            a.download = 'historial_so_datos_' + now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        };
-
-        window._hsoRenderDataView = function () {
-            _colFilters = {};
-            _buildHeader();
-            _buildColFilters();
-            _renderTable();
-        };
-
-        window.hsoApplySearch = function () { _renderTable(); };
-
-    })(); // end Vista de Datos IIFE
 
     // ─── Edit modal ──────────────────────────────────────────────────────────
 
