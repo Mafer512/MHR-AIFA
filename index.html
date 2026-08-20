@@ -169,7 +169,7 @@
             <div class="sidebar-group" data-group-id="fauna">
                 <button class="sidebar-group-toggle" type="button" style="position:relative;">
                     <span class="sidebar-group-badge fauna-badge">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>
                     </span>
                     <span class="sidebar-group-label" style="flex:1;min-width:0;line-height:1.15;">Control de Fauna</span>
                     <span style="position:absolute;right:28px;top:50%;transform:translateY(-50%);padding:3px 6px;border:1px solid rgba(245,158,11,.42);border-radius:999px;background:rgba(245,158,11,.12);color:#fbbf24;font-size:8px;font-weight:800;letter-spacing:.25px;line-height:1;text-transform:uppercase;white-space:nowrap;" title="Módulo en desarrollo">En construcción</span>
@@ -184,9 +184,13 @@
                         <svg class="sidebar-item-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         Historial Fauna
                     </button>
-                    <button class="sidebar-tab" data-tab="estadistica-fauna" type="button">
+                    <button class="sidebar-tab" data-tab="estadistica-aifa" type="button">
                         <svg class="sidebar-item-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        Estadística Fauna
+                        Estadística AIFA
+                    </button>
+                    <button class="sidebar-tab" data-tab="estadistica-afac" type="button">
+                        <svg class="sidebar-item-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                        Estadística AFAC
                     </button>
                 </div>
             </div>
@@ -2036,19 +2040,35 @@
                 </div>
             </div>
         </div> <!-- End estadistica-section -->
-        <!-- Estadística Fauna Section -->
+        <!-- Estadísticas de Fauna AIFA / AFAC -->
         <div id="estadistica-fauna-section" class="content-section">
-            <h1>Estadística Fauna</h1>
+            <h1 id="fes-heading">Estadística AIFA</h1>
 
-            <!-- Sub-tabs Impactos / Rescates -->
-            <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px;">
+            <div id="fes-scope-description" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:12px;color:#1e40af;line-height:1.5;">
+                Indicadores construidos exclusivamente con los registros internos AIFA de <strong>Impacto o Posible Impacto</strong> y <strong>Fauna Rescatada y Reubicada</strong>.
+            </div>
+
+            <!-- Fuentes AIFA: Impactos / Fauna reubicada -->
+            <div id="fes-aifa-kind-tabs" style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px;">
                 <button id="fes-tab-impactos" onclick="fesSwitchTab('impactos')"
                     style="padding:10px 24px;font-size:14px;font-weight:600;background:none;border:none;border-bottom:3px solid #2563eb;color:#2563eb;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
-                    ✈️ Impactos de Ave
+                    ✈️ Impactos / Posibles Impactos
                 </button>
                 <button id="fes-tab-rescates" onclick="fesSwitchTab('rescates')"
                     style="padding:10px 24px;font-size:14px;font-weight:600;background:none;border:none;border-bottom:3px solid transparent;color:#64748b;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
-                    🐾 Rescates
+                    🐾 Fauna Rescatada y Reubicada
+                </button>
+            </div>
+
+            <!-- Fuentes oficiales AFAC: Impactos / Avistamientos -->
+            <div id="fes-afac-kind-tabs" style="display:none;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px;">
+                <button id="fes-afac-tab-impactos" onclick="fesSwitchAfacTab('impactos')"
+                    style="padding:10px 24px;font-size:14px;font-weight:600;background:none;border:none;border-bottom:3px solid #0f766e;color:#0f766e;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
+                    📋 Notificaciones de Impacto AFAC
+                </button>
+                <button id="fes-afac-tab-avistamientos" onclick="fesSwitchAfacTab('avistamientos')"
+                    style="padding:10px 24px;font-size:14px;font-weight:600;background:none;border:none;border-bottom:3px solid transparent;color:#64748b;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
+                    🔍 Avistamientos AFAC
                 </button>
             </div>
 
@@ -2056,7 +2076,7 @@
             <div id="fes-panel-impactos">
 
                 <!-- ── Sub-tabs: Por Aerolínea / Mapa ── -->
-                <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px;">
+                <div id="fes-aifa-impact-nav" style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:20px;">
                     <button id="fes-subtab-aerolineas" onclick="fesSwitchSubTab('aerolineas')"
                         style="padding:8px 20px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:3px solid #1d4ed8;color:#1d4ed8;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
                         🏢 Por Aerolínea
@@ -2064,10 +2084,6 @@
                     <button id="fes-subtab-mapa-imp" onclick="fesSwitchSubTab('mapa-imp')"
                         style="padding:8px 20px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:3px solid transparent;color:#64748b;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
                         🗺️ Mapa
-                    </button>
-                    <button id="fes-subtab-afac" onclick="fesSwitchSubTab('afac')"
-                        style="padding:8px 20px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:3px solid transparent;color:#64748b;cursor:pointer;transition:all .15s;margin-bottom:-2px;">
-                        📋 Forma AFAC
                     </button>
                 </div>
 
@@ -2350,6 +2366,77 @@
                     </div>
                 </div>
 
+                <!-- PANEL: estadística de la forma oficial AFAC de avistamiento -->
+                <div id="fes-sub-afac-avistamientos" style="display:none;">
+                    <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:12px;color:#115e59;line-height:1.5;">
+                        Estadística construida exclusivamente con las <strong>notificaciones de avistamiento de fauna</strong> capturadas en la forma oficial AFAC-SA-FAUNA-A/ene-22.
+                    </div>
+
+                    <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;">
+                        <div style="background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 4px 12px rgba(15,118,110,.25);min-width:135px;">
+                            <div style="font-size:1.9em;font-weight:800;line-height:1.15;" id="fes-afac-avi-total">&ndash;</div>
+                            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;opacity:.9;">Avistamientos AFAC</div>
+                        </div>
+                        <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 4px 12px rgba(220,38,38,.25);min-width:150px;">
+                            <div style="font-size:1.9em;font-weight:800;line-height:1.15;" id="fes-afac-avi-efectos">&ndash;</div>
+                            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;opacity:.9;">Con efecto operacional</div>
+                        </div>
+                        <div style="background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 4px 12px rgba(234,88,12,.25);min-width:145px;">
+                            <div style="font-size:1.9em;font-weight:800;line-height:1.15;" id="fes-afac-avi-restos">&ndash;</div>
+                            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;opacity:.9;">Con restos de fauna</div>
+                        </div>
+                        <div style="background:linear-gradient(135deg,#1d4ed8,#1e40af);color:#fff;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 4px 12px rgba(29,78,216,.25);min-width:190px;">
+                            <div style="font-size:1.2em;font-weight:800;line-height:1.3;padding:2px 0;" id="fes-afac-avi-especie-top">&ndash;</div>
+                            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;opacity:.9;">Especie más avistada</div>
+                        </div>
+                        <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 4px 12px rgba(124,58,237,.25);min-width:190px;">
+                            <div style="font-size:1.2em;font-weight:800;line-height:1.3;padding:2px 0;" id="fes-afac-avi-atrayente-top">&ndash;</div>
+                            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;opacity:.9;">Atrayente más frecuente</div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+                            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🦅 Especies avistadas (casilla 14)</div>
+                            <div id="fes-afac-avi-especies" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;"></div>
+                        </div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+                            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🔢 Ejemplares avistados (casilla 17)</div>
+                            <table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:#f8fafc;"><th style="text-align:left;padding:8px;border-bottom:2px solid #e2e8f0;color:#475569;">Rango</th><th style="text-align:right;padding:8px;border-bottom:2px solid #e2e8f0;color:#475569;">Total</th><th style="padding:8px;border-bottom:2px solid #e2e8f0;min-width:80px;"></th></tr></thead><tbody id="fes-afac-avi-rango-tbody"><tr><td colspan="3" style="padding:12px;color:#94a3b8;text-align:center;">Cargando&hellip;</td></tr></tbody></table>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+                            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🪽 Comportamiento observado (casilla 18)</div>
+                            <table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-comportamiento-tbody"><tr><td colspan="3" style="padding:12px;color:#94a3b8;text-align:center;">Cargando&hellip;</td></tr></tbody></table>
+                        </div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+                            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🧲 Probables atrayentes (casilla 19)</div>
+                            <table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-atrayentes-tbody"><tr><td colspan="3" style="padding:12px;color:#94a3b8;text-align:center;">Cargando&hellip;</td></tr></tbody></table>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-bottom:20px;">
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🌅 Luz solar (casilla 3)</div><table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-luz-tbody"></tbody></table></div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">📏 Tamaño de ejemplares (casilla 15)</div><table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-tamano-tbody"></tbody></table></div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🌤️ Condición del cielo (casilla 10)</div><table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-cielo-tbody"></tbody></table></div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🌧️ Precipitación (casilla 11)</div><table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-precip-tbody"></tbody></table></div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">🌡️ Temperatura (casilla 12)</div><table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-temperatura-tbody"></tbody></table></div>
+                        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;">💨 Viento (casilla 13)</div><table style="width:100%;border-collapse:collapse;font-size:13px;"><tbody id="fes-afac-avi-viento-tbody"></tbody></table></div>
+                    </div>
+
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:20px;">
+                        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:16px;">📅 Avistamientos por mes</div>
+                        <div id="fes-afac-avi-mensual-bars" style="position:relative;height:160px;display:flex;align-items:flex-end;gap:4px;padding:0 4px;border-bottom:2px solid #e2e8f0;border-left:2px solid #e2e8f0;overflow:hidden;"></div>
+                        <div id="fes-afac-avi-mensual-labels" style="display:flex;gap:4px;margin-top:6px;font-size:10px;color:#94a3b8;padding:0 4px;"></div>
+                    </div>
+
+                    <div style="text-align:right;margin-top:4px;">
+                        <button id="refresh-estadisticas-afac-avistamientos-btn" class="btn btn-ghost" style="padding:8px 16px;font-size:13px;">🔄 Actualizar</button>
+                    </div>
+                </div>
+
                 <!-- REMOVED fes-aero-detalle (replaced by inline filter+charts above) -->
                 <div id="fes-aero-detalle" style="display:none;">
                         <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;border-bottom:1px solid #f1f5f9;padding-bottom:14px;">
@@ -2502,7 +2589,7 @@
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px;">
                     <div style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:12px;padding:18px;text-align:center;box-shadow:0 4px 12px rgba(22,163,74,.25);">
                         <div style="font-size:2.4em;font-weight:800;line-height:1;" id="fes-res-total">–</div>
-                        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:6px;opacity:.9;">Total Rescates</div>
+                        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:6px;opacity:.9;">Reportes de Reubicación</div>
                     </div>
                     <div style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;border-radius:12px;padding:18px;text-align:center;box-shadow:0 4px 12px rgba(8,145,178,.25);">
                         <div style="font-size:1.3em;font-weight:800;line-height:1.2;padding:4px 0;" id="fes-res-especie-top">–</div>
@@ -2521,11 +2608,11 @@
                 <!-- Mapa + tabla especies rescatadas -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
                     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
-                        <h3 style="margin:0 0 10px;font-size:14px;font-weight:700;color:#1e293b;">🗺️ Mapa de Rescates</h3>
+                        <h3 style="margin:0 0 10px;font-size:14px;font-weight:700;color:#1e293b;">🗺️ Mapa de Fauna Reubicada</h3>
                         <div id="fes-res-map" style="height:320px;border-radius:8px;border:1px solid #e2e8f0;"></div>
                     </div>
                     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
-                        <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1e293b;">🐾 Especies Rescatadas</h3>
+                        <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1e293b;">🐾 Especies Rescatadas y Reubicadas</h3>
                         <table style="width:100%;border-collapse:collapse;font-size:13px;">
                             <thead><tr style="background:#f8fafc;">
                                 <th style="text-align:left;padding:8px;border-bottom:2px solid #e2e8f0;color:#475569;">Clase</th>
@@ -2569,7 +2656,7 @@
 
                 <!-- Tendencia mensual rescates -->
                 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-top:20px;">
-                    <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1e293b;">📅 Tendencia Mensual de Rescates</h3>
+                    <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1e293b;">📅 Tendencia Mensual de Rescates y Reubicaciones</h3>
                     <div id="fes-res-mensual-bars" style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px;"></div>
                     <div id="fes-res-mensual-labels" style="display:flex;gap:6px;margin-top:4px;font-size:10px;color:#94a3b8;"></div>
                 </div>
@@ -2802,14 +2889,14 @@
     <script src="./js/pages/fauna-afac-page.js"></script>
     <script src="./js/pages/fauna-avistamiento-page.js"></script>
     <script src="./js/pages/offline-sync-page.js"></script>
-    <script src="./js/services/fauna-report-service.js"></script>
+    <script src="./js/services/fauna-report-service.js?v=2"></script>
     <script src="./js/services/fauna-afac-service.js"></script>
-    <script src="./js/services/fauna-avistamiento-service.js"></script>
+    <script src="./js/services/fauna-avistamiento-service.js?v=2"></script>
     <script src="./js/services/fauna-catalog-service.js?v=2"></script>
     <script src="./js/services/catalog-service.js"></script>
     <script src="./js/services/user-service.js"></script>
-    <script src="./js/services/permissions-service.js?v=3"></script>
-    <script src="./js/pages/view-permissions-page.js"></script>
+    <script src="./js/services/permissions-service.js?v=4"></script>
+    <script src="./js/pages/view-permissions-page.js?v=2"></script>
     <script src="./js/ui/identity-lock.js"></script>
     <script src="./js/services/report-service.js"></script>
     <script src="./js/services/report-mailer.js"></script>
@@ -2863,15 +2950,15 @@
     </div>
     <script src="./js/pages/historial-so-page.js"></script>
     <script src="./js/pages/auth-session-page.js"></script>
-    <script src="./js/pages/main-tabs-page.js"></script>
+    <script src="./js/pages/main-tabs-page.js?v=2"></script>
     <script src="./js/pages/offline-report-sync-page.js"></script>
     <script src="./js/pages/offline-fauna-sync-page.js"></script>
     <script src="./js/pages/fauna-submit-page.js"></script>
     <script src="./js/pages/fauna-afac-submit-page.js"></script>
     <script src="./js/pages/fauna-avistamiento-submit-page.js"></script>
-    <script src="./js/pages/fauna-dashboard-page.js?v=2"></script>
+    <script src="./js/pages/fauna-dashboard-page.js?v=3"></script>
     <script src="./js/pages/estadistica-so-page.js"></script>
-    <script src="./js/pages/supabase-orchestrator-page.js"></script>
+    <script src="./js/pages/supabase-orchestrator-page.js?v=2"></script>
     <script src="./js/supabase-client.js"></script>
     <script>
         (function () {

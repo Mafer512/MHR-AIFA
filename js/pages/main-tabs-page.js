@@ -3,6 +3,7 @@ window.MHRMainTabsPage = (function () {
     options = options || {};
     var cargarCatalogosFauna = options.cargarCatalogosFauna;
     var loadFaunaStatistics = options.loadFaunaStatistics;
+    var loadAfacStatistics = options.loadAfacStatistics;
     var loadFaunaReports = options.loadFaunaReports;
     var loadEstadisticas = options.loadEstadisticas;
 
@@ -18,7 +19,12 @@ window.MHRMainTabsPage = (function () {
 
         sections.forEach(function (section) { section.classList.remove('active'); });
         window.scrollTo(0, 0);
-        var targetSection = document.getElementById(targetTab + '-section');
+        // Los tableros AIFA y AFAC comparten el contenedor visual, pero cada
+        // pestaña activa una fuente de datos independiente.
+        var sectionKey = (targetTab === 'estadistica-aifa' || targetTab === 'estadistica-afac')
+          ? 'estadistica-fauna'
+          : targetTab;
+        var targetSection = document.getElementById(sectionKey + '-section');
         if (targetSection) {
           targetSection.classList.add('active');
 
@@ -35,10 +41,18 @@ window.MHRMainTabsPage = (function () {
               if (typeof window.resetHistorialFilters === 'function') window.resetHistorialFilters();
             } else if (targetTab === 'estadistica') {
               mainTitle.textContent = 'Estadísticas';
-            } else if (targetTab === 'estadistica-fauna') {
-              mainTitle.textContent = 'Estadística Fauna';
+            } else if (targetTab === 'estadistica-aifa') {
+              mainTitle.textContent = 'Estadística AIFA';
+              if (typeof window.fesSwitchStatisticsScope === 'function') window.fesSwitchStatisticsScope('aifa');
               if (typeof cargarCatalogosFauna === 'function') cargarCatalogosFauna();
               if (typeof loadFaunaStatistics === 'function') loadFaunaStatistics();
+            } else if (targetTab === 'estadistica-afac') {
+              mainTitle.textContent = 'Estadística AFAC';
+              if (typeof window.fesSwitchStatisticsScope === 'function') {
+                window.fesSwitchStatisticsScope('afac');
+              } else if (typeof loadAfacStatistics === 'function') {
+                loadAfacStatistics();
+              }
             } else if (targetTab === 'historial-fauna') {
               mainTitle.textContent = 'Historial de Reportes de Fauna';
               if (typeof cargarCatalogosFauna === 'function') cargarCatalogosFauna();

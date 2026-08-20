@@ -3,8 +3,8 @@
 -- Agencia Federal de Aviación Civil · Dirección Ejecutiva de Seguridad Aérea
 --
 -- A diferencia de la notificación de impacto, este formato NO se replica en
--- public.fauna_reports ni alimenta las estadísticas del módulo de Fauna:
--- vive por completo en public.fauna_afac_avistamiento.
+-- public.fauna_reports: vive por completo en public.fauna_afac_avistamiento y
+-- alimenta únicamente el tablero independiente de Estadística AFAC.
 --
 -- Ejecutar en el SQL Editor de Supabase (o vía `supabase db push`).
 -- Es idempotente: puede correrse varias veces sin efectos colaterales.

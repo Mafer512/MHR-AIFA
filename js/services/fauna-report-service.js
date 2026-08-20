@@ -1,19 +1,31 @@
 (function(){
+  function isAfacMirror(report) {
+    if (String((report && report.origen) || '').trim().toUpperCase() === 'AFAC') return true;
+    var items = Array.isArray(report && report.detalle_items) ? report.detalle_items : [];
+    return items.some(function (item) {
+      var type = String((item && item.type) || '').toLowerCase();
+      return type.indexOf('afac') !== -1 && type.indexOf('impacto') !== -1;
+    });
+  }
+
   window.MHRFaunaReportService = {
     async insertFaunaReport(client, payload){
       var resp = await client.from('fauna_reports').insert([payload]).select();
       if (resp.error) throw resp.error;
       return resp.data || [];
     },
-    async getHallazgosYears(client){
+    async getHallazgosYears(client, filters){
+      filters = filters || {};
       var resp = await client
         .from('fauna_reports')
-        .select('fecha_reporte')
+        .select('fecha_reporte, detalle_items')
         .not('ubicacion_lat', 'is', null)
         .not('ubicacion_lng', 'is', null)
         .order('fecha_reporte', { ascending: false });
       if (resp.error) throw resp.error;
-      return Array.from(new Set((resp.data || []).map(function (r) {
+      var rows = resp.data || [];
+      if (filters.excludeAfac) rows = rows.filter(function (r) { return !isAfacMirror(r); });
+      return Array.from(new Set(rows.map(function (r) {
         return (r.fecha_reporte || '').toString().slice(0, 4);
       }).filter(Boolean)));
     },
@@ -41,7 +53,7 @@
       filters = filters || {};
       var query = client
         .from('fauna_reports')
-        .select('id, folio, fecha_reporte, clase, especie, tipo_reporte, ubicacion_lat, ubicacion_lng, ubicacion_texto')
+        .select('id, folio, fecha_reporte, clase, especie, tipo_reporte, ubicacion_lat, ubicacion_lng, ubicacion_texto, detalle_items')
         .not('ubicacion_lat', 'is', null)
         .not('ubicacion_lng', 'is', null)
         .order('fecha_reporte', { ascending: false });
@@ -58,7 +70,9 @@
       if (filters.especie) query = query.eq('especie', filters.especie);
       var resp = await query;
       if (resp.error) throw resp.error;
-      return resp.data || [];
+      var rows = resp.data || [];
+      if (filters.excludeAfac) rows = rows.filter(function (r) { return !isAfacMirror(r); });
+      return rows;
     }
   };
 })();

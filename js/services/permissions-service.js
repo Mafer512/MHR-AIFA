@@ -44,8 +44,12 @@
             icono: 'fa-clock-rotate-left', desc: 'Consultar los reportes de fauna registrados'
         },
         {
-            grupo: 'Control de Fauna', key: 'estadistica-fauna', label: 'Estadística de Fauna', editable: false,
-            icono: 'fa-chart-pie', desc: 'Gráficas, mapa de hallazgos y forma AFAC'
+            grupo: 'Control de Fauna', key: 'estadistica-aifa', label: 'Estadística AIFA', editable: false,
+            icono: 'fa-chart-pie', desc: 'Impactos y fauna rescatada o reubicada registrados por AIFA'
+        },
+        {
+            grupo: 'Control de Fauna', key: 'estadistica-afac', label: 'Estadística AFAC', editable: false,
+            icono: 'fa-chart-line', desc: 'Notificaciones oficiales AFAC de impacto y avistamiento'
         },
         {
             grupo: 'Administración', key: 'admin-usuarios', label: 'Administración', editable: false,
@@ -58,7 +62,7 @@
         {
             id: 'consulta', nombre: 'Solo consulta', icono: 'fa-eye', color: 'primary',
             desc: 'Ve todo, no captura nada',
-            ver: ['revision', 'historial', 'estadistica', 'fauna', 'historial-fauna', 'estadistica-fauna'],
+            ver: ['revision', 'historial', 'estadistica', 'fauna', 'historial-fauna', 'estadistica-aifa', 'estadistica-afac'],
             editar: []
         },
         {
@@ -70,13 +74,13 @@
         {
             id: 'fauna', nombre: 'Capturista Fauna', icono: 'fa-dove', color: 'success',
             desc: 'Captura reportes de control de fauna',
-            ver: ['fauna', 'historial-fauna', 'estadistica-fauna'],
+            ver: ['fauna', 'historial-fauna', 'estadistica-aifa', 'estadistica-afac'],
             editar: ['fauna']
         },
         {
             id: 'completo', nombre: 'Captura todo', icono: 'fa-star', color: 'warning',
             desc: 'Captura en ambos módulos',
-            ver: ['revision', 'historial', 'estadistica', 'fauna', 'historial-fauna', 'estadistica-fauna'],
+            ver: ['revision', 'historial', 'estadistica', 'fauna', 'historial-fauna', 'estadistica-aifa', 'estadistica-afac'],
             editar: ['revision', 'fauna']
         },
         {
@@ -111,6 +115,17 @@
         return VISTAS.map(function (v) { return v.key; });
     }
 
+    // Compatibilidad con permisos guardados antes de separar ambos tableros.
+    // Quien podía ver "estadistica-fauna" conserva acceso a AIFA y AFAC.
+    function expandirClavesLegadas(lista) {
+        if (!Array.isArray(lista) || lista.indexOf('estadistica-fauna') === -1) return lista;
+        var result = lista.filter(function (key) { return key !== 'estadistica-fauna'; });
+        ['estadistica-aifa', 'estadistica-afac'].forEach(function (key) {
+            if (result.indexOf(key) === -1) result.push(key);
+        });
+        return result;
+    }
+
     /**
      * Traduce los permisos guardados a algo directamente utilizable.
      * @returns {{total:boolean, ver:string[], editar:string[]}}
@@ -127,12 +142,16 @@
         if (ver === null) {
             // Sin configurar: conserva lo que veía antes (todo menos administración).
             ver = todasLasClaves().filter(function (k) { return k !== 'admin-usuarios'; });
+        } else {
+            ver = expandirClavesLegadas(ver);
         }
 
         var editar = comoLista(perms.secciones_edicion);
         if (editar === null) {
             // Sin configurar: se respeta la capacidad de captura de su rol.
             editar = ROLES_EDITORES.indexOf(rol) !== -1 ? ver.slice() : [];
+        } else {
+            editar = expandirClavesLegadas(editar);
         }
 
         // Sólo tiene sentido editar algo que se puede ver.

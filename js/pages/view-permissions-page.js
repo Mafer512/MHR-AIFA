@@ -124,6 +124,10 @@
         var api = window.MHRPermissions;
         var activa = document.querySelector('.content-section.active');
         var keyActiva = activa ? activa.id.replace(/-section$/, '') : null;
+        if (keyActiva === 'estadistica-fauna') {
+            var estadisticaActiva = document.querySelector('.sidebar-tab.active[data-tab^="estadistica-"]');
+            keyActiva = estadisticaActiva ? estadisticaActiva.getAttribute('data-tab') : 'estadistica-aifa';
+        }
 
         if (keyActiva && api.puedeVer(P, keyActiva)) return;
 

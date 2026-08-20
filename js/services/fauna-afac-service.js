@@ -2,8 +2,8 @@
  * Persistencia de la Notificación de Impacto con Fauna (forma AFAC).
  *
  * El reporte se guarda en dos lugares complementarios:
- *   1. public.fauna_reports        → columnas que ya alimentan las estadísticas
- *                                    y el mapa del módulo de Fauna.
+ *   1. public.fauna_reports        → copia de compatibilidad para historial y
+ *                                    georreferencia; Estadística AIFA la excluye.
  *   2. public.fauna_afac_impacto   → las 28 casillas de la forma oficial.
  * ==========================================================================*/
 (function () {

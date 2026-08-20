@@ -3,7 +3,7 @@
  *
  * A diferencia de la notificación de impacto, este reporte no se replica en
  * public.fauna_reports: vive por completo en public.fauna_afac_avistamiento
- * y no alimenta las estadísticas del módulo.
+ * y alimenta únicamente el tablero de Estadística AFAC.
  * ==========================================================================*/
 (function () {
     'use strict';

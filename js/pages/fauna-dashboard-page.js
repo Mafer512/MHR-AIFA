@@ -510,17 +510,92 @@ window.MHRFaunaDashboardPage = (function () {
                 return m;
             }
 
-            // ── sub-tab switching (Gráficas / Aerolíneas) ────────────────────
+            // ── separación de tableros por fuente: AIFA / AFAC ───────────────
+            var _fesStatisticsScope = 'aifa';
+            var _fesAfacTab = 'impactos';
+
+            window.fesSwitchAfacTab = function(tab) {
+                _fesAfacTab = tab === 'avistamientos' ? 'avistamientos' : 'impactos';
+                var imp = document.getElementById('fes-sub-afac');
+                var avi = document.getElementById('fes-sub-afac-avistamientos');
+                var tImp = document.getElementById('fes-afac-tab-impactos');
+                var tAvi = document.getElementById('fes-afac-tab-avistamientos');
+
+                if (imp) imp.style.display = _fesAfacTab === 'impactos' ? '' : 'none';
+                if (avi) avi.style.display = _fesAfacTab === 'avistamientos' ? '' : 'none';
+
+                [tImp, tAvi].forEach(function(btn) {
+                    if (!btn) return;
+                    btn.style.borderBottomColor = 'transparent';
+                    btn.style.color = '#64748b';
+                });
+                var active = _fesAfacTab === 'impactos' ? tImp : tAvi;
+                if (active) {
+                    active.style.borderBottomColor = '#0f766e';
+                    active.style.color = '#0f766e';
+                }
+
+                if (_fesAfacTab === 'impactos') loadAfacStatistics();
+                else loadAfacAvistamientoStatistics();
+            };
+
+            window.fesSwitchStatisticsScope = function(scope) {
+                _fesStatisticsScope = scope === 'afac' ? 'afac' : 'aifa';
+                var heading = document.getElementById('fes-heading');
+                var desc = document.getElementById('fes-scope-description');
+                var aifaTabs = document.getElementById('fes-aifa-kind-tabs');
+                var afacTabs = document.getElementById('fes-afac-kind-tabs');
+                var impPanel = document.getElementById('fes-panel-impactos');
+                var resPanel = document.getElementById('fes-panel-rescates');
+                var aifaNav = document.getElementById('fes-aifa-impact-nav');
+
+                if (_fesStatisticsScope === 'aifa') {
+                    if (heading) heading.textContent = 'Estadística AIFA';
+                    if (desc) {
+                        desc.style.background = '#eff6ff';
+                        desc.style.borderColor = '#bfdbfe';
+                        desc.style.color = '#1e40af';
+                        desc.innerHTML = 'Indicadores construidos exclusivamente con los registros internos AIFA de <strong>Impacto o Posible Impacto</strong> y <strong>Fauna Rescatada y Reubicada</strong>.';
+                    }
+                    if (aifaTabs) aifaTabs.style.display = 'flex';
+                    if (afacTabs) afacTabs.style.display = 'none';
+                    if (aifaNav) aifaNav.style.display = 'flex';
+                    window.fesSwitchTab('impactos');
+                    window.fesSwitchSubTab('aerolineas');
+                    return;
+                }
+
+                if (heading) heading.textContent = 'Estadística AFAC';
+                if (desc) {
+                    desc.style.background = '#f0fdfa';
+                    desc.style.borderColor = '#99f6e4';
+                    desc.style.color = '#115e59';
+                    desc.innerHTML = 'Indicadores construidos exclusivamente con las formas oficiales AFAC: <strong>Notificación de Impacto con Fauna</strong> y <strong>Notificación de Avistamiento de Fauna</strong>.';
+                }
+                if (aifaTabs) aifaTabs.style.display = 'none';
+                if (afacTabs) afacTabs.style.display = 'flex';
+                if (aifaNav) aifaNav.style.display = 'none';
+                if (impPanel) impPanel.style.display = '';
+                if (resPanel) resPanel.style.display = 'none';
+
+                ['fes-sub-graficas', 'fes-sub-aerolineas', 'fes-sub-mapa-imp'].forEach(function(id) {
+                    var panel = document.getElementById(id);
+                    if (panel) panel.style.display = 'none';
+                });
+                window.fesSwitchAfacTab(_fesAfacTab);
+            };
+
+            // ── sub-tab switching AIFA (Gráficas / Aerolíneas / Mapas) ───────
             window.fesSwitchSubTab = function(sub) {
                 // Impactos sub-tabs
                 var panGraf    = document.getElementById('fes-sub-graficas');
                 var panAero    = document.getElementById('fes-sub-aerolineas');
                 var panMapaImp = document.getElementById('fes-sub-mapa-imp');
                 var panAfac    = document.getElementById('fes-sub-afac');
+                var panAfacAvi = document.getElementById('fes-sub-afac-avistamientos');
                 var tGraf    = document.getElementById('fes-subtab-graficas');
                 var tAero    = document.getElementById('fes-subtab-aerolineas');
                 var tMapaImp = document.getElementById('fes-subtab-mapa-imp');
-                var tAfac    = document.getElementById('fes-subtab-afac');
                 // Rescates sub-tabs
                 var panResRes  = document.getElementById('fes-sub-res-resumen');
                 var panMapaRes = document.getElementById('fes-sub-mapa-res');
@@ -539,15 +614,15 @@ window.MHRFaunaDashboardPage = (function () {
                 }
 
                 // ── Impactos sub-tabs ────────────────────────────────────────
-                if (sub === 'graficas' || sub === 'aerolineas' || sub === 'mapa-imp' || sub === 'afac') {
+                if (sub === 'graficas' || sub === 'aerolineas' || sub === 'mapa-imp') {
                     if (panGraf)    panGraf.style.display    = sub === 'graficas'   ? '' : 'none';
                     if (panAero)    panAero.style.display    = sub === 'aerolineas' ? '' : 'none';
                     if (panMapaImp) panMapaImp.style.display = sub === 'mapa-imp'   ? '' : 'none';
-                    if (panAfac)    panAfac.style.display    = sub === 'afac'       ? '' : 'none';
-                    setInactive(tGraf); setInactive(tAero); setInactive(tMapaImp); setInactive(tAfac);
+                    if (panAfac)    panAfac.style.display    = 'none';
+                    if (panAfacAvi) panAfacAvi.style.display = 'none';
+                    setInactive(tGraf); setInactive(tAero); setInactive(tMapaImp);
                     if (sub === 'graficas')        setActive(tGraf,    '#dc2626');
                     else if (sub === 'aerolineas') setActive(tAero,    '#1d4ed8');
-                    else if (sub === 'afac')       setActive(tAfac,    '#0f766e');
                     else                            setActive(tMapaImp, '#0d9488');
                     if (sub === 'aerolineas' && window._fesLastImpData) fesRenderAerolineas(window._fesLastImpData);
                     if (sub === 'mapa-imp') {
@@ -556,7 +631,6 @@ window.MHRFaunaDashboardPage = (function () {
                             _refreshFesImpMap();
                         });
                     }
-                    if (sub === 'afac') loadAfacStatistics();
                 }
                 // ── Rescates sub-tabs ────────────────────────────────────────
                 else if (sub === 'res-resumen' || sub === 'mapa-res') {
@@ -741,7 +815,7 @@ window.MHRFaunaDashboardPage = (function () {
 
                 if (yearSel && !yearSel.options.length) {
                     try {
-                        var years = await window.MHRFaunaReportService.getHallazgosYears(client);
+                        var years = await window.MHRFaunaReportService.getHallazgosYears(client, { excludeAfac: true });
                         yearSel.innerHTML = '<option value="" selected>Todos los años</option>' +
                             (years || []).map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
                     } catch (e) {
@@ -945,7 +1019,7 @@ window.MHRFaunaDashboardPage = (function () {
                 var data = [];
                 try {
                     data = await window.MHRFaunaReportService.getHallazgosMapData(window.supabaseClient, {
-                        tipo: 'Rescate', year: year, month: month, clase: clase, especie: especie
+                        tipo: 'Rescate', year: year, month: month, clase: clase, especie: especie, excludeAfac: true
                     });
                 } catch (e) { console.error('Error loading rescate map data', e); }
                 _renderFaunaLegend('fes-res-map-legend');
@@ -974,6 +1048,8 @@ window.MHRFaunaDashboardPage = (function () {
                 var isImp = tab === 'impactos';
                 document.getElementById('fes-panel-impactos').style.display = isImp ? '' : 'none';
                 document.getElementById('fes-panel-rescates').style.display  = isImp ? 'none' : '';
+                var mapaImpactos = document.getElementById('fes-sub-mapa-imp');
+                if (!isImp && mapaImpactos) mapaImpactos.style.display = 'none';
                 var tImp = document.getElementById('fes-tab-impactos');
                 var tRes = document.getElementById('fes-tab-rescates');
                 if (tImp) {
@@ -986,6 +1062,9 @@ window.MHRFaunaDashboardPage = (function () {
                 }
                 if (!isImp && !_fesResMap && window._fesLastResData) {
                     setTimeout(function(){ _fesResMap = fesInitMiniMap('fes-res-map', window._fesLastResData, '#16a34a'); }, 100);
+                }
+                if (isImp && _fesStatisticsScope === 'aifa' && typeof window.fesSwitchSubTab === 'function') {
+                    window.fesSwitchSubTab('aerolineas');
                 }
             };
 
@@ -1400,6 +1479,83 @@ window.MHRFaunaDashboardPage = (function () {
             }
             window.loadAfacStatistics = loadAfacStatistics;
 
+            // ── Estadística de la forma AFAC-SA-FAUNA-A/ene-22 ──────────────
+            var ATRAYENTES_AFAC = {
+                A: 'Vertedero de basura',
+                B: 'Cuerpo de agua',
+                C: 'Vegetación',
+                E: 'Actividades agrícolas',
+                F: 'Actividades comerciales',
+                G: 'Otro'
+            };
+
+            async function loadAfacAvistamientoStatistics() {
+                var client = window.supabaseClient;
+                if (!client || !window.MHRFaunaAvistamientoService) return;
+
+                var data;
+                try {
+                    data = await window.MHRFaunaAvistamientoService.getAvistamientos(client, {});
+                } catch (err) {
+                    console.error('Error cargando la estadística de avistamientos AFAC:', err);
+                    return;
+                }
+                window._fesLastAfacAvistamientoData = data;
+
+                var setText = function(id, value) {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = value;
+                };
+                var especies = fesCountBy(data, 'especie_fauna');
+                var atrayentes = fesCountByArray(data, 'atrayentes', function(code) {
+                    return ATRAYENTES_AFAC[code] || code;
+                });
+
+                setText('fes-afac-avi-total', data.length);
+                setText('fes-afac-avi-efectos', data.filter(function(r) { return r.efectos_operacion === true; }).length);
+                setText('fes-afac-avi-restos', data.filter(function(r) { return r.restos_fauna === true; }).length);
+                setText('fes-afac-avi-especie-top', fesTopKey(especies));
+                setText('fes-afac-avi-atrayente-top', fesTopKey(atrayentes));
+
+                fesHBarChart('fes-afac-avi-especies', especies, '#0f766e');
+                fesFillTable('fes-afac-avi-rango-tbody', fesCountBy(data, 'ejemplares_avistados'), 'Sin datos de ejemplares');
+                fesFillTable('fes-afac-avi-comportamiento-tbody', fesCountBy(data, 'comportamiento'), 'Sin comportamientos registrados');
+                fesFillTable('fes-afac-avi-atrayentes-tbody', atrayentes, 'Sin atrayentes registrados');
+                fesFillTable('fes-afac-avi-luz-tbody', fesCountBy(data, 'luz_solar'), 'Sin datos');
+                fesFillTable('fes-afac-avi-tamano-tbody', fesCountBy(data, 'tamano_ejemplares'), 'Sin datos');
+                fesFillTable('fes-afac-avi-cielo-tbody', fesCountBy(data, 'condicion_cielo'), 'Sin datos');
+                fesFillTable('fes-afac-avi-precip-tbody', fesCountBy(data, 'precipitacion'), 'Sin datos');
+                fesFillTable('fes-afac-avi-temperatura-tbody', fesCountBy(data, 'temperatura'), 'Sin datos');
+                fesFillTable('fes-afac-avi-viento-tbody', fesCountBy(data, 'viento'), 'Sin datos');
+
+                var porMes = new Array(12).fill(0);
+                data.forEach(function(r) {
+                    var raw = r.fecha_evento || r.created_at;
+                    var date = raw ? new Date(String(raw).slice(0, 10) + 'T12:00:00') : null;
+                    if (date && !isNaN(date.getTime())) porMes[date.getMonth()]++;
+                });
+                fesBarChart('fes-afac-avi-mensual-bars', 'fes-afac-avi-mensual-labels', porMes, MESES, '#0f766e');
+            }
+
+            async function loadAfacDashboardStatistics() {
+                await Promise.all([loadAfacStatistics(), loadAfacAvistamientoStatistics()]);
+            }
+
+            window.loadAfacAvistamientoStatistics = loadAfacAvistamientoStatistics;
+            window.loadAfacDashboardStatistics = loadAfacDashboardStatistics;
+
+            // Las notificaciones AFAC de impacto se replican en fauna_reports
+            // para el historial. Esta firma identifica también datos antiguos
+            // que pudieran no tener todavía la columna origen='AFAC'.
+            function fesIsAfacMirror(report) {
+                if (String((report && report.origen) || '').trim().toUpperCase() === 'AFAC') return true;
+                var items = Array.isArray(report && report.detalle_items) ? report.detalle_items : [];
+                return items.some(function(item) {
+                    var type = String((item && item.type) || '').toLowerCase();
+                    return type.indexOf('afac') !== -1 && type.indexOf('impacto') !== -1;
+                });
+            }
+
             async function loadFaunaStatistics() {
                 const client = window.supabaseClient;
                 if (!client) { console.error('Supabase client not ready'); return; }
@@ -1407,8 +1563,11 @@ window.MHRFaunaDashboardPage = (function () {
                 try {
                     const all = (await window.MHRFaunaReportService.getAllFaunaReports(client)) || [];
 
-                    var impData = all.filter(function(r){ return r.tipo_reporte !== 'Rescate'; });
-                    var resData = all.filter(function(r){ return r.tipo_reporte === 'Rescate'; });
+                    // AIFA sólo consume sus dos formularios internos. Las copias
+                    // de impacto AFAC se excluyen para impedir doble conteo.
+                    var aifaData = all.filter(function(r) { return !fesIsAfacMirror(r); });
+                    var impData = aifaData.filter(function(r){ return r.tipo_reporte !== 'Rescate'; });
+                    var resData = aifaData.filter(function(r){ return r.tipo_reporte === 'Rescate'; });
 
                     window._fesLastImpData = impData;
                     window._fesLastResData = resData;
@@ -1690,7 +1849,7 @@ window.MHRFaunaDashboardPage = (function () {
 
             async function loadFaunaHallazgosYears() {
                 if (!window.supabaseClient || !faunaYearSelect) return;
-                var years = await window.MHRFaunaReportService.getHallazgosYears(window.supabaseClient);
+                var years = await window.MHRFaunaReportService.getHallazgosYears(window.supabaseClient, { excludeAfac: true });
                 faunaHallazgosYears = years;
                 faunaYearSelect.innerHTML = '';
                 var allOption = document.createElement('option');
@@ -1741,7 +1900,8 @@ window.MHRFaunaDashboardPage = (function () {
                     year: selectedYear,
                     month: selectedMonth,
                     clase: selectedClase,
-                    especie: selectedEspecie
+                    especie: selectedEspecie,
+                    excludeAfac: true
                 });
 
                 if (!faunaHallazgosMarkersLayer) faunaHallazgosMarkersLayer = L.layerGroup().addTo(faunaHallazgosMap);
@@ -1862,6 +2022,7 @@ window.MHRFaunaDashboardPage = (function () {
             // Event listener para el botón de actualizar estadísticas de fauna
             document.getElementById('refresh-estadisticas-fauna-btn')?.addEventListener('click', loadFaunaStatistics);
             document.getElementById('refresh-estadisticas-afac-btn')?.addEventListener('click', loadAfacStatistics);
+            document.getElementById('refresh-estadisticas-afac-avistamientos-btn')?.addEventListener('click', loadAfacAvistamientoStatistics);
 
             // Exponer para uso externo (fauna-submit-page, supabase-orchestrator)
             window.loadFaunaReports = loadFaunaReports;

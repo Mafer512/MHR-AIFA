@@ -1052,7 +1052,7 @@
 ═══════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-<script src="./js/services/permissions-service.js?v=3"></script>
+<script src="./js/services/permissions-service.js?v=4"></script>
 <script>
 (function () {
   'use strict';
@@ -1075,8 +1075,9 @@
     ],
     'Control de Fauna': [
       { key: 'fauna',             label: 'Formato Informes Control de Fauna' },
-      { key: 'historial-fauna',   label: 'Historial Control de Fauna' },
-      { key: 'estadistica-fauna', label: 'Estadística Control de Fauna' }
+      { key: 'historial-fauna', label: 'Historial Control de Fauna' },
+      { key: 'estadistica-aifa', label: 'Estadística AIFA' },
+      { key: 'estadistica-afac', label: 'Estadística AFAC' }
     ],
     'Administración': [
       { key: 'admin-usuarios', label: 'Administración de Usuarios' }
@@ -1455,7 +1456,11 @@
       : '<option value="">-- Ninguna --</option>';
 
     // Build views checkboxes
-    var viewsChecked = perm.allowed_sections || [];
+    var viewsChecked = (perm.allowed_sections || []).slice();
+    if (viewsChecked.indexOf('estadistica-fauna') >= 0) {
+      if (viewsChecked.indexOf('estadistica-aifa') < 0) viewsChecked.push('estadistica-aifa');
+      if (viewsChecked.indexOf('estadistica-afac') < 0) viewsChecked.push('estadistica-afac');
+    }
     var viewsHtml = Object.entries(AU_SECTIONS).map(function (entry) {
       var group = entry[0], items = entry[1];
       return '<div class="mb-2">' +

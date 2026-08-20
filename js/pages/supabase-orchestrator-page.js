@@ -25,6 +25,7 @@ window.MHRSupabaseOrchestratorPage = (function () {
       window.MHRMainTabsPage.init({
         cargarCatalogosFauna: function () { if (typeof window.cargarCatalogosFauna === 'function') window.cargarCatalogosFauna(); },
         loadFaunaStatistics:  function () { if (typeof window.loadFaunaStatistics  === 'function') window.loadFaunaStatistics(); },
+        loadAfacStatistics:   function () { if (typeof window.loadAfacDashboardStatistics === 'function') window.loadAfacDashboardStatistics(); },
         loadFaunaReports:     function (f) { if (typeof window.loadFaunaReports    === 'function') window.loadFaunaReports(f || {}); },
         loadEstadisticas: estadisticaSoApi ? estadisticaSoApi.loadEstadisticas : null
       });
