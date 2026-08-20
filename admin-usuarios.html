@@ -2762,8 +2762,45 @@
 <script>
 (function () {
     var _auDbRows = [];      // cache de filas cargadas
-    var _auDbEditIata = null; // null = nueva fila
+    var _auDbEditTarget = null; // null = nueva fila; objeto = registro existente
     var _auDbPendingFile = null; // archivo local pendiente de subir
+
+    function _auDbText(value) {
+        return value == null ? '' : String(value).trim();
+    }
+
+    function _auDbEscape(value) {
+        return _auDbText(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function _auDbNormalizeRow(row) {
+        row = row || {};
+        var rawIata = _auDbText(row.codigo_iata);
+        var rawOaci = _auDbText(row.codigo_oaci);
+        var rawName = _auDbText(row.nombre_aerolinea);
+        return {
+            codigo_iata: rawIata.toUpperCase(),
+            codigo_oaci: rawOaci.toUpperCase(),
+            nombre_aerolinea: rawName,
+            logo_url: _auDbText(row.logo_url),
+            _dbIata: rawIata,
+            _dbIataOriginal: row.codigo_iata,
+            _dbIataWasNull: row.codigo_iata == null,
+            _dbOaci: rawOaci,
+            _dbNombre: rawName
+        };
+    }
+
+    function _auDbLogoUrl(row) {
+        if (/^https?:\/\//i.test(row.logo_url)) return row.logo_url;
+        if (!row.codigo_iata) return '';
+        return 'https://www.gstatic.com/flights/airline_logos/70px/' + encodeURIComponent(row.codigo_iata) + '.png';
+    }
 
     // ── Cargar tabla ─────────────────────────────────────────────
     window.auDbLoad = async function () {
@@ -2787,31 +2824,45 @@
                 return;
             }
 
-            _auDbRows = resp.data || [];
+            _auDbRows = (resp.data || []).map(_auDbNormalizeRow);
 
             if (!_auDbRows.length) {
                 tbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#94a3b8;">Sin aerolíneas registradas.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = _auDbRows.map(function (r) {
-                var logoUrl = r.logo_url || ('https://www.gstatic.com/flights/airline_logos/70px/' + encodeURIComponent(r.codigo_iata) + '.png');
-                var logoCell = '<img src="' + logoUrl + '" alt="' + r.codigo_iata + '" '
-                    + 'style="width:48px;height:48px;object-fit:contain;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;padding:4px;" '
-                    + 'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" />'
-                    + '<div style="display:none;width:48px;height:48px;border-radius:8px;background:#1d4ed8;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;">'
-                    + r.codigo_iata.substring(0, 2) + '</div>';
+            tbody.innerHTML = _auDbRows.map(function (r, index) {
+                var hasIata = !!r.codigo_iata;
+                var logoUrl = _auDbLogoUrl(r);
+                var fallbackText = (r.codigo_iata || r.nombre_aerolinea || r.codigo_oaci || '??').substring(0, 2).toUpperCase();
+                var logoCell = (logoUrl
+                    ? '<img src="' + _auDbEscape(logoUrl) + '" alt="' + _auDbEscape(r.codigo_iata || r.nombre_aerolinea || 'Aerolínea') + '" '
+                        + 'style="width:48px;height:48px;object-fit:contain;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;padding:4px;" '
+                        + 'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" />'
+                    : '')
+                    + '<div style="display:' + (logoUrl ? 'none' : 'flex') + ';width:48px;height:48px;border-radius:8px;background:' + (hasIata ? '#1d4ed8' : '#d97706') + ';align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;">'
+                    + _auDbEscape(fallbackText) + '</div>';
+                var iataCell = hasIata
+                    ? _auDbEscape(r.codigo_iata)
+                    : '<span style="display:inline-flex;align-items:center;gap:5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;"><i class="fa fa-triangle-exclamation"></i>Sin IATA</span>';
+                var storedLogoUrl = /^https?:\/\//i.test(r.logo_url) ? r.logo_url : '';
+                var logoLink = storedLogoUrl
+                    ? '<a href="' + _auDbEscape(storedLogoUrl) + '" target="_blank" rel="noopener noreferrer" style="color:#2563eb;">' + _auDbEscape(storedLogoUrl) + '</a>'
+                    : '<span style="color:#94a3b8;">' + (hasIata ? 'Sin URL (usa Google Flights)' : 'Sin URL') + '</span>';
+                var deleteButton = hasIata
+                    ? '<button class="btn btn-sm btn-outline-danger" onclick="auDbDeleteRowAt(' + index + ')" title="Eliminar"><i class="fa fa-trash"></i></button>'
+                    : '<button class="btn btn-sm btn-outline-danger" disabled title="Primero asigna el código IATA"><i class="fa fa-trash"></i></button>';
                 return '<tr>'
                     + '<td style="padding:10px 16px;"><div style="display:flex;align-items:center;gap:0;">' + logoCell + '</div></td>'
-                    + '<td style="padding:10px 16px;font-weight:700;color:#1e293b;">' + r.codigo_iata + '</td>'
-                    + '<td style="padding:10px 16px;color:#475569;font-size:12px;">' + (r.codigo_oaci || '<span style="color:#cbd5e1;">—</span>') + '</td>'
-                    + '<td style="padding:10px 16px;">' + r.nombre_aerolinea + '</td>'
+                    + '<td style="padding:10px 16px;font-weight:700;color:#1e293b;">' + iataCell + '</td>'
+                    + '<td style="padding:10px 16px;color:#475569;font-size:12px;">' + (r.codigo_oaci ? _auDbEscape(r.codigo_oaci) : '<span style="color:#cbd5e1;">—</span>') + '</td>'
+                    + '<td style="padding:10px 16px;">' + (_auDbEscape(r.nombre_aerolinea) || '<span style="color:#b45309;">Sin nombre</span>') + '</td>'
                     + '<td style="padding:10px 16px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b;font-size:12px;">'
-                        + (r.logo_url ? '<a href="' + r.logo_url + '" target="_blank" style="color:#2563eb;">' + r.logo_url + '</a>' : '<span style="color:#94a3b8;">Sin URL (usa Google Flights)</span>')
+                        + logoLink
                     + '</td>'
                     + '<td style="padding:10px 16px;text-align:center;white-space:nowrap;">'
-                        + '<button class="btn btn-sm btn-outline-primary me-1" onclick="auDbEditRow(\'' + r.codigo_iata.replace(/'/g, "\\'") + '\')" title="Editar"><i class="fa fa-pen"></i></button>'
-                        + '<button class="btn btn-sm btn-outline-danger" onclick="auDbDelete(\'' + r.codigo_iata.replace(/'/g, "\\'") + '\')" title="Eliminar"><i class="fa fa-trash"></i></button>'
+                        + '<button class="btn btn-sm btn-outline-primary me-1" onclick="auDbEditRowAt(' + index + ')" title="' + (hasIata ? 'Editar' : 'Asignar código IATA') + '"><i class="fa fa-pen"></i></button>'
+                        + deleteButton
                     + '</td>'
                     + '</tr>';
             }).join('');
@@ -2822,7 +2873,7 @@
 
     // ── Nueva fila ───────────────────────────────────────────────
     window.auDbNewRow = function () {
-        _auDbEditIata = null;
+        _auDbEditTarget = null;
         _auDbPendingFile = null;
         var nameEl = document.getElementById('au-db-file-name');
         if (nameEl) nameEl.textContent = '';
@@ -2840,16 +2891,22 @@
     };
 
     // ── Editar fila ──────────────────────────────────────────────
-    window.auDbEditRow = function (iata) {
-        var row = _auDbRows.find(function (r) { return r.codigo_iata === iata; });
+    window.auDbEditRowAt = function (index) {
+        var row = _auDbRows[index];
         if (!row) return;
-        _auDbEditIata = iata;
+        _auDbEditTarget = {
+            iata: row._dbIata,
+            iataOriginal: row._dbIataOriginal,
+            iataWasNull: row._dbIataWasNull,
+            oaci: row._dbOaci,
+            nombre: row._dbNombre
+        };
         _auDbPendingFile = null;
         var nameEl = document.getElementById('au-db-file-name');
         if (nameEl) nameEl.textContent = '';
-        document.getElementById('au-db-edit-title').textContent = 'Editar: ' + row.nombre_aerolinea;
+        document.getElementById('au-db-edit-title').textContent = (row.codigo_iata ? 'Editar: ' : 'Corregir registro: ') + (row.nombre_aerolinea || row.codigo_oaci || 'sin identificar');
         document.getElementById('au-db-iata').value = row.codigo_iata;
-        document.getElementById('au-db-iata').disabled = true; // PK — no editable
+        document.getElementById('au-db-iata').disabled = !!row.codigo_iata; // PK existente no editable
         document.getElementById('au-db-oaci').value = row.codigo_oaci || '';
         document.getElementById('au-db-nombre').value = row.nombre_aerolinea;
         document.getElementById('au-db-logo').value = row.logo_url || '';
@@ -2857,8 +2914,15 @@
         var msg = document.getElementById('au-db-msg');
         if (msg) msg.style.display = 'none';
         document.getElementById('au-db-edit-panel').style.display = '';
-        document.getElementById('au-db-nombre').focus();
+        document.getElementById(row.codigo_iata ? 'au-db-nombre' : 'au-db-iata').focus();
         document.getElementById('au-db-edit-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    // Compatibilidad con llamadas anteriores por código IATA.
+    window.auDbEditRow = function (iata) {
+        var normalizedIata = _auDbText(iata).toUpperCase();
+        var index = _auDbRows.findIndex(function (r) { return r.codigo_iata === normalizedIata; });
+        if (index !== -1) auDbEditRowAt(index);
     };
 
     // ── Preview logo ─────────────────────────────────────────────
@@ -2970,10 +3034,29 @@
         var payload = { codigo_iata: iata, nombre_aerolinea: nombre, logo_url: logo, codigo_oaci: oaci };
         var resp;
 
-        if (_auDbEditIata) {
-            resp = await client.from('catalogo_aerolineas')
-                .update({ nombre_aerolinea: nombre, logo_url: logo, codigo_oaci: oaci })
-                .eq('codigo_iata', _auDbEditIata);
+        if (_auDbEditTarget) {
+            if (_auDbEditTarget.iata) {
+                resp = await client.from('catalogo_aerolineas')
+                    .update({ nombre_aerolinea: nombre, logo_url: logo, codigo_oaci: oaci })
+                    .eq('codigo_iata', _auDbEditTarget.iata);
+            } else {
+                // Registro legado sin IATA: se identifica con sus valores originales
+                // para asignarle la clave sin afectar otras filas incompletas.
+                if (!_auDbEditTarget.oaci && !_auDbEditTarget.nombre) {
+                    msg.textContent = 'No se puede identificar de forma segura este registro incompleto.';
+                    msg.className = 'mt-3 small text-danger';
+                    msg.style.display = '';
+                    return;
+                }
+                var repairQuery = client.from('catalogo_aerolineas')
+                    .update(payload);
+                repairQuery = _auDbEditTarget.iataWasNull
+                    ? repairQuery.is('codigo_iata', null)
+                    : repairQuery.eq('codigo_iata', _auDbEditTarget.iataOriginal);
+                if (_auDbEditTarget.oaci) repairQuery = repairQuery.eq('codigo_oaci', _auDbEditTarget.oaci);
+                if (_auDbEditTarget.nombre) repairQuery = repairQuery.eq('nombre_aerolinea', _auDbEditTarget.nombre);
+                resp = await repairQuery;
+            }
         } else {
             resp = await client.from('catalogo_aerolineas').insert([payload]);
         }
@@ -2984,7 +3067,7 @@
             return;
         }
 
-        msg.textContent = _auDbEditIata ? 'Aerolínea actualizada.' : 'Aerolínea creada.';
+        msg.textContent = _auDbEditTarget ? 'Aerolínea actualizada.' : 'Aerolínea creada.';
         msg.className = 'mt-3 small text-success';
         setTimeout(function () {
             document.getElementById('au-db-edit-panel').style.display = 'none';
@@ -3018,6 +3101,12 @@
         var resp = await client.from('catalogo_aerolineas').delete().eq('codigo_iata', iata);
         if (resp.error) { alert('Error: ' + resp.error.message); return; }
         auDbLoad();
+    };
+
+    window.auDbDeleteRowAt = function (index) {
+        var row = _auDbRows[index];
+        if (!row || !row._dbIata) return;
+        auDbDelete(row._dbIata);
     };
 
     // ═════════════════════════════════════════════════════════════
