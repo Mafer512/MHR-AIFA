@@ -7,7 +7,7 @@
     <title>MHR · AIFA</title>
     <meta name="description" content="Sistema institucional de reportes de mantenimiento y seguridad operacional del Aeropuerto Internacional Felipe Ángeles.">
     <!-- PWA: manifest e iconos -->
-    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="manifest" href="./manifest.webmanifest?v=20260820.1">
     <meta name="theme-color" content="#1e3a5f">
     <meta name="color-scheme" content="dark light">
     <meta name="application-name" content="MHR">
@@ -22,15 +22,63 @@
     <link rel="apple-touch-icon" sizes="152x152" href="./icons/icon-152.png">
     <link rel="apple-touch-icon" sizes="167x167" href="./icons/icon-167.png">
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png">
-    <!-- Registro del Service Worker (soporte offline) -->
+    <!-- Registro y actualización automática del Service Worker -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(function (reg) { console.log('[SW] Registrado:', reg.scope); })
-                    .catch(function (err) { console.warn('[SW] Error al registrar:', err); });
+        (function () {
+            if (!('serviceWorker' in navigator)) return;
+
+            var PWA_VERSION = '20260820.1';
+            var hadController = !!navigator.serviceWorker.controller;
+            var reloadingForUpdate = false;
+            var registration = null;
+
+            function activateWaitingWorker(reg) {
+                if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+                // En la primera instalación no hace falta recargar. Cuando ya
+                // existía una versión instalada, la recarga aplica el nuevo
+                // HTML y los nuevos scripts en el mismo acceso directo.
+                if (!hadController || reloadingForUpdate) return;
+                reloadingForUpdate = true;
+                window.location.reload();
             });
-        }
+
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./sw.js?v=' + PWA_VERSION, {
+                    scope: './',
+                    updateViaCache: 'none'
+                }).then(function (reg) {
+                    registration = reg;
+                    activateWaitingWorker(reg);
+
+                    reg.addEventListener('updatefound', function () {
+                        var worker = reg.installing;
+                        if (!worker) return;
+                        worker.addEventListener('statechange', function () {
+                            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                                worker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    });
+
+                    // No esperar al ciclo periódico del navegador: revisar en
+                    // cada apertura de la PWA instalada.
+                    return reg.update();
+                }).catch(function (err) {
+                    console.warn('[SW] No se pudo comprobar la actualización:', err);
+                });
+            });
+
+            // Una PWA puede permanecer abierta durante horas. Al volver a ella
+            // se comprueba de nuevo si hay una versión publicada.
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible' && registration) {
+                    registration.update().catch(function () {});
+                }
+            });
+        })();
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <!-- Leaflet.js para mapa interactivo -->
