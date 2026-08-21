@@ -5,6 +5,56 @@
       if (resp.error) throw resp.error;
       return resp.data || [];
     },
+    async recoverMissingReportPdfUrls(client, reports){
+      reports = Array.isArray(reports) ? reports : [];
+      var pendingFolios = Object.create(null);
+      reports.forEach(function(report){
+        var folio = String((report && report.folio) || '').trim();
+        if (report && !report.pdf_url && folio) pendingFolios[folio] = true;
+      });
+      if (Object.keys(pendingFolios).length === 0) return reports;
+
+      var filesByFolio = Object.create(null);
+      var pageSize = 1000;
+      var maxPages = 5;
+      for (var page = 0; page < maxPages && Object.keys(pendingFolios).length > 0; page++) {
+        var listResp = await client.storage.from('reports').list('', {
+          limit: pageSize,
+          offset: page * pageSize,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+        if (listResp.error) {
+          console.warn('[MHRReportService] No se pudo listar el bucket reports:', listResp.error);
+          return reports;
+        }
+
+        var files = Array.isArray(listResp.data) ? listResp.data : [];
+        files.forEach(function(file){
+          var name = String((file && file.name) || '');
+          if (name.indexOf('report_') !== 0 || !name.endsWith('.pdf')) return;
+          var body = name.slice('report_'.length, -'.pdf'.length);
+          var separator = body.lastIndexOf('_');
+          if (separator <= 0 || !/^\d+$/.test(body.slice(separator + 1))) return;
+          var folio = body.slice(0, separator);
+          if (pendingFolios[folio] && !filesByFolio[folio]) {
+            filesByFolio[folio] = file;
+            delete pendingFolios[folio];
+          }
+        });
+        if (files.length < pageSize) break;
+      }
+
+      reports.forEach(function(report){
+        if (!report || report.pdf_url) return;
+        var folio = String(report.folio || '').trim();
+        var file = filesByFolio[folio];
+        if (!file) return;
+        var publicResp = client.storage.from('reports').getPublicUrl(file.name);
+        var publicUrl = publicResp && publicResp.data && publicResp.data.publicUrl;
+        if (publicUrl) report.pdf_url = publicUrl;
+      });
+      return reports;
+    },
     async getReportsWithItemsOrdered(client){
       // Reportes con sus items (sin fotos) para análisis estadístico
       var resp = await client

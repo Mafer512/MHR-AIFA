@@ -535,7 +535,15 @@
             console.error('[HistorialSO] Error al cargar reportes:', resp.error);
             return [];
         }
-        return resp.data || [];
+        var reports = resp.data || [];
+        if (window.MHRReportService && typeof window.MHRReportService.recoverMissingReportPdfUrls === 'function') {
+            try {
+                await window.MHRReportService.recoverMissingReportPdfUrls(window.supabaseClient, reports);
+            } catch (pdfRecoveryError) {
+                console.warn('[HistorialSO] No se pudieron recuperar enlaces PDF antiguos:', pdfRecoveryError);
+            }
+        }
+        return reports;
     }
 
     function showLoadingState() {
@@ -996,9 +1004,7 @@
             var updateRes = await client.from('reports').update({
                 estatus: estatus,
                 observacion: observacion || null,
-                observacion_imagenes: JSON.stringify(existingUrls),
-                // El PDF anterior ya no representa estos datos modificados.
-                pdf_url: null
+                observacion_imagenes: JSON.stringify(existingUrls)
             }).eq('id', reportId);
 
             if (updateRes.error) throw updateRes.error;
@@ -1008,7 +1014,6 @@
                 report.estatus = estatus;
                 report.observacion = observacion;
                 report.observacion_imagenes = JSON.stringify(existingUrls);
-                report.pdf_url = null;
             }
 
             if (msgEl) { msgEl.style.color = '#16a34a'; msgEl.textContent = '✅ Guardado correctamente.'; }
