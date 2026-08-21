@@ -22,9 +22,16 @@
                 fauna_afac: false
             };
 
+            var FIRMA_IDS_REVISION = ['area', 'aifa', 'afac'];
+            var FIRMA_IDS_FAUNA = ['fauna_aifa', 'fauna_afac'];
+            var resetHandlersBound = false;
+
             function initFirmaPad(padId) {
                 var canvas = document.getElementById('firma-' + padId);
                 if (!canvas) return;
+                window.firmaPads[padId] = canvas;
+                if (canvas.dataset && canvas.dataset.mhrFirmaInicializada === 'true') return;
+                if (canvas.dataset) canvas.dataset.mhrFirmaInicializada = 'true';
 
                 var ctx = canvas.getContext('2d');
                 var drawing = false;
@@ -102,17 +109,20 @@
                 canvas.addEventListener('touchend', function() {
                     drawing = false;
                 });
-
-                window.firmaPads[padId] = canvas;
             }
 
             // Función global para limpiar firma
             window.limpiarFirma = function(padId) {
                 var canvas = window.firmaPads[padId];
-                if (!canvas) return;
-                var ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                if (canvas) {
+                    var ctx = canvas.getContext('2d');
+                    ctx.save();
+                    if (typeof ctx.setTransform === 'function') ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.restore();
+                }
                 window.firmaData[padId] = null;
                 window.firmaGuardada[padId] = false;
                 
@@ -122,6 +132,33 @@
                     statusEl.style.display = 'none';
                 }
             };
+
+            function limpiarGrupoFirmas(ids) {
+                ids.forEach(function(padId) { window.limpiarFirma(padId); });
+            }
+
+            window.limpiarFirmasRevision = function() {
+                limpiarGrupoFirmas(FIRMA_IDS_REVISION);
+            };
+
+            window.limpiarFirmasFauna = function() {
+                limpiarGrupoFirmas(FIRMA_IDS_FAUNA);
+            };
+
+            window.limpiarTodasLasFirmas = function() {
+                limpiarGrupoFirmas(FIRMA_IDS_REVISION.concat(FIRMA_IDS_FAUNA));
+            };
+
+            // Los canvas no se reinician con form.reset(). Se enlazan de forma
+            // explícita para cubrir cualquier envío o reinicio futuro.
+            function bindFormResetHandlers() {
+                if (resetHandlersBound) return;
+                resetHandlersBound = true;
+                var revisionForm = document.getElementById('report-form');
+                var faunaForm = document.getElementById('fauna-form');
+                if (revisionForm) revisionForm.addEventListener('reset', window.limpiarFirmasRevision);
+                if (faunaForm) faunaForm.addEventListener('reset', window.limpiarFirmasFauna);
+            }
 
             // Detecta si el canvas tiene trazos (no está completamente en blanco)
             function canvasTieneTrazo(canvas) {
@@ -234,6 +271,7 @@
                     initFirmaPad('afac');
                     initFirmaPad('fauna_aifa');
                     initFirmaPad('fauna_afac');
+                    bindFormResetHandlers();
                 }, 100);
             });
 
@@ -246,6 +284,7 @@
                         initFirmaPad('afac');
                         initFirmaPad('fauna_aifa');
                         initFirmaPad('fauna_afac');
+                        bindFormResetHandlers();
                     }, 100);
                 });
             } else {
@@ -255,6 +294,7 @@
                     initFirmaPad('afac');
                     initFirmaPad('fauna_aifa');
                     initFirmaPad('fauna_afac');
+                    bindFormResetHandlers();
                 }, 100);
             }
         })();

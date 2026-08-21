@@ -1,4 +1,4 @@
-const APP_VERSION = '20260820.2';
+const APP_VERSION = '20260821.1';
 const CACHE_PREFIX = 'mhr-cache-';
 const CACHE_NAME = CACHE_PREFIX + APP_VERSION;
 

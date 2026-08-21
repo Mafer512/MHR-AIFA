@@ -103,6 +103,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // el formulario no debe permitir reportar a nombre de otra persona.
         try { if (window.MHRIdentity) window.MHRIdentity.fijar(); } catch (e) { }
 
+        // Las firmas viven en canvas y no se limpian al vaciar inputs. Además
+        // del dibujo se elimina su copia Base64 para que no pase al reporte siguiente.
+        try {
+            if (typeof window.limpiarTodasLasFirmas === 'function') window.limpiarTodasLasFirmas();
+        } catch (e) { console.error('Error clearing signatures', e); }
+
         if (isRevisionActive) {
             try {
                 var authorSel = document.getElementById('report-authors-select');
